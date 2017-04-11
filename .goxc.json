@@ -1,0 +1,40 @@
+{
+  "Tasks": [
+    "default"
+  ],
+  "TaskSettings": {
+    "publish-github": {
+      "body": "",
+      "owner": "Wikia",
+      "repository": "konfigurator"
+    },
+    "deb": {
+      "bin-dir": "/usr/bin",
+      "go-sources-dir": ".",
+      "metadata": {
+        "maintainer": "Łukasz Harasimowicz",
+        "maintainerEmail": "dev@harnash.eu"
+      },
+      "metadata-deb": {
+        "Build-Depends": "debhelper (>=4.0.0), golang-go, gcc",
+        "Depends": ""
+      },
+      "other-mappped-files": {},
+      "rmtemp": true
+    }
+  },
+  "TasksExclude": [
+    "go-vet",
+    "go-test"
+  ],
+  "BuildSettings": {
+    "LdFlagsXVars": {
+      "TimeNow": "github.com/Wikia/konfigurator/main.BuildTime",
+      "Version": "github.com/Wikia/konfigurator/main.Version"
+    },
+    "Tags": "important",
+    "ExtraArgs": ["-a"]
+  },
+  "PackageVersion": "0.0.0",
+  "ConfigVersion": "0.9"
+}

@@ -2,6 +2,8 @@
   "Tasks": [
     "default"
   ],
+  "ResourcesInclude": "README.md,LICENSE",
+  "ResourcesExclude": "*.go",
   "TaskSettings": {
     "publish-github": {
       "body": "",

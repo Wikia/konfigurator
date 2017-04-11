@@ -13,7 +13,6 @@ matrix:
 before_install:
 - go get github.com/mattn/goveralls
 - go get github.com/modocache/gover
-- go get github.com/laher/goxc
 - go get github.com/Masterminds/glide
 install:
 - make prepare
@@ -23,6 +22,7 @@ script:
 - make vet
 - make test-cover
 before_deploy:
+- go get github.com/laher/goxc
 - goxc
 after_success:
 - if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci

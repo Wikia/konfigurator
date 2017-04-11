@@ -1,0 +1,47 @@
+sudo: false
+language: go
+matrix:
+  allow_failures:
+  - go: tip
+  include:
+  - go: 1.5.4
+    env: GO15VENDOREXPERIMENT=1
+  - go: 1.6.3
+  - go: 1.7.4
+    env: SEND_COVERAGE=1
+  - go: tip
+before_install:
+- go get github.com/mattn/goveralls
+- go get github.com/modocache/gover
+- go get github.com/laher/goxc
+- go get github.com/Masterminds/glide
+install:
+- make prepare
+script:
+- make fmt-check
+- if ([ "$TRAVIS_GO_VERSION" != "1.5.4" ]); then make lint; fi
+- make vet
+- make test-cover
+before_deploy:
+- goxc
+after_success:
+- if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
+  -coverprofile=gover.coverprofile; fi
+os:
+- linux
+notifications:
+  email: false
+deploy:
+  provider: releases
+  file_glob: true
+  file:
+  - "$HOME/gopath/bin/konfigurator-xc/*/konfigurator_*.tar.gz"
+  - "$HOME/gopath/bin/konfigurator-xc/*/konfigurator_*.deb"
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
+    go: 1.7.4
+    repo: Wikia/konfigurator
+  api_key:
+    secure: TT+ZIMNCrjoBnphMs2xMWWm4mR5dbqHFH0buWPOvQFnFTQtEJ7lqNk8JiC3wIf4/INDc8xmTVr6eBFjFVck9HG/VSzBJCyJbsrR3ai6BRUICPQqTRaWs+W4Nf3j3xk1rMjcPdyGZAybtbdeN6N4hC6t7krGeW3knbHHxsMJhkJ5bvxpYK69yvUnKFOqJukAAu8wbF3zh6VV2NAsus2cpKEmz/RKhUmQypYwrNYrPwH7s0Op2WHJ8TQ2vi7veqp9vJv1gK5OPEcENV82sXVIL0WkPUg8923ll1eWgQrYfB2KcuEOuVnElaRW5UC5SG0Sz9CySH3LI2j/nDQ0xqTV+halNuq8O7miY7D73SvnCngLCQK4G5FrWhwVn/P40EAxofZwGQE87oZ3lHj2PU3E/hn3nIg0Ab8MzjzEtU32FAYMn5SZM+dz1C/vZ4ktrXdBeqyRFhVoOi6uZRQcxwKW/YiDQaDN0UzJs+W8FAMrZziOxTGvfhe2y+GxKuUInJwt4vv0ioUgVEHqhvkhyKvWb9hHDoUY+5pbbVEtFnpUFSgd1zSojPxycrw4Gar/lMU8StRmkjHMFoyw2ekX5LsUtZm7m36uDQW+JB5VGvLtbkBd7HdJyhzMECPQ9UJIknQ2b1K446mN50NGts+N3bJgUyM55eQouZQD6IVahb65gYdQ=

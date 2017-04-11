@@ -8,7 +8,7 @@ matrix:
     env: GO15VENDOREXPERIMENT=1
   - go: 1.6.3
   - go: 1.7.4
-    env: SEND_COVERAGE=1
+    env: SEND_COVERAGE=0
   - go: tip
 before_install:
 - go get github.com/mattn/goveralls

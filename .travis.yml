@@ -2,14 +2,14 @@ sudo: false
 language: go
 matrix:
   allow_failures:
-  - go: tip
+  - go: master
   include:
   - go: 1.5.4
     env: GO15VENDOREXPERIMENT=1
   - go: 1.6.x
-  - go: 1.7.x
-    env: SEND_COVERAGE=0
   - go: tip
+    env: SEND_COVERAGE=0
+  - go: master
 before_install:
 - go get github.com/mattn/goveralls
 - go get github.com/modocache/gover

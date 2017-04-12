@@ -29,6 +29,7 @@
     "go-vet",
     "go-test"
   ],
+  "BuildConstraints": "linux,darwin",
   "BuildSettings": {
     "LdFlagsXVars": {
       "TimeNow": "github.com/Wikia/konfigurator/main.BuildTime",

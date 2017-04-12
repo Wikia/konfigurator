@@ -23,7 +23,7 @@ script:
 - make test-cover
 before_deploy:
 - go get github.com/laher/goxc
-- goxc
+- goxc goxc -main-dirs-exclude=vendor
 after_success:
 - if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
   -coverprofile=gover.coverprofile; fi

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -37,7 +38,7 @@ var RootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.WithError(err).Error("Error running command")
 		os.Exit(-1)
 	}
 }
@@ -60,5 +61,17 @@ func initConfig() {
 
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	} else {
+		log.WithError(err).Error("Error loading config file")
+		os.Exit(-2)
 	}
+
+	viper.SetDefault("logLevel", "info")
+	logLevel, err := log.ParseLevel(viper.GetString("logLevel"))
+	if err != nil {
+		log.WithError(err).Error("Error parsing logLevel")
+		os.Exit(-3)
+	}
+
+	log.SetLevel(logLevel)
 }

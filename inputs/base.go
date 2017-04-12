@@ -1,34 +1,38 @@
 package inputs
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Wikia/konfigurator/config"
+)
 
 type Input interface {
 	Unmarshal(b []byte, t interface{}) error
 }
 
-var registry map[string]Input
+var registry map[config.VariableSource]Input
 
-func Register(name string, input Input) error {
-	has, _ := registry[name]
+func Register(source config.VariableSource, input Input) error {
+	has, _ := registry[source]
 	if has {
-		return fmt.Errorf("Input already defined: %s", name)
+		return fmt.Errorf("Input already defined: %s", source)
 	}
 
 	if registry == nil {
-		registry = map[string]Input{}
+		registry = map[config.VariableSource]Input{}
 	}
 
-	registry[name] = input
+	registry[source] = input
 
 	return nil
 }
 
-func Get(name string) Input {
-	return registry[name]
+func Get(source config.VariableSource) Input {
+	return registry[source]
 }
 
-func GetRegisteredNames() []string {
-	keys := make([]string, len(registry))
+func GetRegisteredNames() []config.VariableSource {
+	keys := make([]config.VariableSource, len(registry))
 	i := 0
 	for k := range registry {
 		keys[i] = k

@@ -20,6 +20,7 @@ import (
 	"github.com/Wikia/konfigurator/outputs"
 	"github.com/spf13/cobra"
 
+	"github.com/Wikia/konfigurator/config"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,6 +38,10 @@ var downloadCmd = &cobra.Command{
 			log.WithField("output", OutputFmt).Error("Unknown output format")
 			return
 		}
+
+		conf := config.Get()
+
+		log.Debug(conf)
 	},
 }
 

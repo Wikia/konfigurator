@@ -1,12 +1,11 @@
 package config
 
-type VariableSource uint
+type VariableSource string
 
 const (
-	_                     = iota
-	SIMPLE VariableSource = 1
-	POD
-	VAULT
-	FAILE
-	PODYAML
+	SIMPLE  VariableSource = "simple"
+	POD                    = "pod"
+	VAULT                  = "valut"
+	FILE                   = "file"
+	PODYAML                = "pod_yaml"
 )

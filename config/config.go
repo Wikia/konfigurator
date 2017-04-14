@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	KubeConfPath string
-	Definitions  map[string][]VariableDef
+	Definitions  []VariableDef
 }
 
 type VariableDef struct {

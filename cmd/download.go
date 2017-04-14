@@ -20,7 +20,7 @@ import (
 	"github.com/Wikia/konfigurator/outputs"
 	"github.com/spf13/cobra"
 
-	"github.com/Wikia/konfigurator/config"
+	"github.com/Wikia/konfigurator/model"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -38,10 +38,20 @@ var downloadCmd = &cobra.Command{
 			log.WithField("output", OutputFmt).Error("Unknown output format")
 			return
 		}
-
-		conf := config.Get()
-
-		log.Debug(conf)
+		yamlOut := outputs.Get("yaml")
+		vars := []model.Variable{
+			{
+				Name:  "test1",
+				Type:  model.CONFIGMAP,
+				Value: "foo1",
+			},
+			{
+				Name:  "secret1",
+				Type:  model.SECRET,
+				Value: 123,
+			},
+		}
+		yamlOut.Save("helios3", vars)
 	},
 }
 

@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	"github.com/Wikia/konfigurator/config"
+	"github.com/Wikia/konfigurator/model"
 )
 
 type Input interface {
-	Unmarshal(b []byte, t interface{}) error
+	Fetch(source string) ([]model.Variable, error)
 }
 
 var registry map[config.VariableSource]Input

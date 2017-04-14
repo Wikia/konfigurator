@@ -20,11 +20,16 @@ import (
 	"github.com/Wikia/konfigurator/outputs"
 	"github.com/spf13/cobra"
 
+	"os"
+
 	"github.com/Wikia/konfigurator/model"
 	log "github.com/sirupsen/logrus"
 )
 
-var OutputFmt string
+var (
+	OutputFmt   string
+	Destination string
+)
 
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
@@ -38,6 +43,7 @@ var downloadCmd = &cobra.Command{
 			log.WithField("output", OutputFmt).Error("Unknown output format")
 			return
 		}
+
 		yamlOut := outputs.Get("yaml")
 		vars := []model.Variable{
 			{
@@ -51,12 +57,18 @@ var downloadCmd = &cobra.Command{
 				Value: 123,
 			},
 		}
-		yamlOut.Save("helios3", vars)
+		yamlOut.Save("helios", Destination, vars)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(downloadCmd)
+	workingDir, err := os.Getwd()
 
+	if err != nil {
+		log.WithError(err).Error("Error getting working directory")
+		os.Exit(-6)
+	}
 	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
+	downloadCmd.Flags().StringVarP(&Destination, "destination", "d", workingDir, "Where to store the output files")
 }

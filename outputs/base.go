@@ -1,9 +1,13 @@
 package outputs
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Wikia/konfigurator/model"
+)
 
 type Output interface {
-	Marshal(t interface{}) ([]byte, error)
+	Save(name string, destination string, vars []model.Variable) error
 }
 
 var registry map[string]Output

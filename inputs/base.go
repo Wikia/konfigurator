@@ -7,33 +7,43 @@ import (
 	"github.com/Wikia/konfigurator/model"
 )
 
+type Type string
+
+const (
+	SIMPLE  Type = "simple"
+	POD          = "pod"
+	VAULT        = "valut"
+	FILE         = "file"
+	PODYAML      = "pod_yaml"
+)
+
 type Input interface {
-	Fetch(source string) ([]model.Variable, error)
+	Fetch(variable config.VariableDef) ([]model.Variable, error)
 }
 
-var registry map[config.VariableSource]Input
+var registry map[Type]Input
 
-func Register(source config.VariableSource, input Input) error {
-	has, _ := registry[source]
+func Register(inputType Type, input Input) error {
+	has, _ := registry[inputType]
 	if has {
-		return fmt.Errorf("Input already defined: %s", source)
+		return fmt.Errorf("Input already defined: %s", inputType)
 	}
 
 	if registry == nil {
-		registry = map[config.VariableSource]Input{}
+		registry = map[Type]Input{}
 	}
 
-	registry[source] = input
+	registry[inputType] = input
 
 	return nil
 }
 
-func Get(source config.VariableSource) Input {
+func Get(source Type) Input {
 	return registry[source]
 }
 
-func GetRegisteredNames() []config.VariableSource {
-	keys := make([]config.VariableSource, len(registry))
+func GetRegisteredNames() []Type {
+	keys := make([]Type, len(registry))
 	i := 0
 	for k := range registry {
 		keys[i] = k

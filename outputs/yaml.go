@@ -16,9 +16,9 @@ import (
 	v1 "k8s.io/client-go/pkg/api/v1"
 )
 
-type OutputYaml struct{}
+type OutputK8SYaml struct{}
 
-func (o *OutputYaml) Save(name string, destination string, vars []model.Variable) error {
+func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Variable) error {
 	destinationPath, err := filepath.Abs(destination)
 
 	if err != nil {
@@ -118,5 +118,5 @@ func (o *OutputYaml) Save(name string, destination string, vars []model.Variable
 }
 
 func init() {
-	Register("yaml", &OutputYaml{})
+	Register("k8s-yaml", &OutputK8SYaml{})
 }

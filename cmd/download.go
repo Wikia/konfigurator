@@ -22,8 +22,8 @@ import (
 
 	"os"
 
-	"github.com/Wikia/konfigurator/model"
 	log "github.com/Sirupsen/logrus"
+	"github.com/Wikia/konfigurator/model"
 )
 
 var (
@@ -44,7 +44,6 @@ var downloadCmd = &cobra.Command{
 			return
 		}
 
-		yamlOut := outputs.Get("yaml")
 		vars := []model.Variable{
 			{
 				Name:  "test1",
@@ -57,7 +56,7 @@ var downloadCmd = &cobra.Command{
 				Value: 123,
 			},
 		}
-		yamlOut.Save("helios", Destination, vars)
+		out.Save("helios", Destination, vars)
 	},
 }
 
@@ -69,6 +68,6 @@ func init() {
 		log.WithError(err).Error("Error getting working directory")
 		os.Exit(-6)
 	}
-	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
+	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
 	downloadCmd.Flags().StringVarP(&Destination, "destination", "d", workingDir, "Where to store the output files")
 }

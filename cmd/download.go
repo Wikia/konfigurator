@@ -23,7 +23,7 @@ import (
 	"os"
 
 	"github.com/Wikia/konfigurator/model"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 )
 
 var (

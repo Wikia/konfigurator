@@ -3,8 +3,8 @@ package config
 import (
 	"os"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/model"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 

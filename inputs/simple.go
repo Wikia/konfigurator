@@ -3,14 +3,13 @@ package inputs
 import (
 	"fmt"
 
-	"github.com/Wikia/konfigurator/config"
 	"github.com/Wikia/konfigurator/model"
 )
 
 type Simple struct{}
 
-func (i *Simple) Fetch(variable config.VariableDef) (model.Variable, error) {
-	if variable.Source != config.SIMPLE {
+func (i *Simple) Fetch(variable model.VariableDef) (model.Variable, error) {
+	if variable.Source != SIMPLE {
 		return nil, fmt.Errorf("Invalid variable type: %s for %s", variable.Type, variable.Name)
 	}
 
@@ -24,5 +23,5 @@ func (i *Simple) Fetch(variable config.VariableDef) (model.Variable, error) {
 }
 
 func init() {
-	Register(config.SIMPLE, &Simple{})
+	Register(SIMPLE, &Simple{})
 }

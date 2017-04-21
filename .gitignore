@@ -23,3 +23,8 @@ _testmain.go
 *.test
 *.prof
 bin/
+
+# configuration files
+.konfigurator.yaml
+*_configMap.yaml
+*_secrets.yaml

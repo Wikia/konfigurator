@@ -76,4 +76,6 @@ func initConfig() {
 	}
 
 	log.SetLevel(logLevel)
+	cfg := config.Get()
+	viper.UnmarshalKey("variables", &cfg.Definitions)
 }

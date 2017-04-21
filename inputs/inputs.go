@@ -7,13 +7,13 @@ import (
 )
 
 type Input interface {
-	Fetch(variable model.VariableDef) ([]model.Variable, error)
+	Fetch(variable model.VariableDef) (*model.Variable, error)
 }
 
 var registry map[model.InputType]Input
 
 func Register(inputType model.InputType, input Input) error {
-	has, _ := registry[inputType]
+	_, has := registry[inputType]
 	if has {
 		return fmt.Errorf("Input already defined: %s", inputType)
 	}
@@ -40,4 +40,26 @@ func GetRegisteredNames() []model.InputType {
 	}
 
 	return keys
+}
+
+func Process(defs []model.VariableDef) ([]model.Variable, error) {
+	ret := []model.Variable{}
+
+	for _, definition := range defs {
+		processor := Get(definition.Source)
+
+		if processor == nil {
+			return nil, fmt.Errorf("Could not find input processor (%s) for: %s", definition.Source, definition.Name)
+		}
+
+		variable, err := processor.Fetch(definition)
+
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, *variable)
+	}
+
+	return ret, nil
 }

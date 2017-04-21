@@ -17,13 +17,14 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/Wikia/konfigurator/inputs"
 	"github.com/Wikia/konfigurator/outputs"
 	"github.com/spf13/cobra"
 
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/Wikia/konfigurator/model"
+	"github.com/Wikia/konfigurator/config"
 )
 
 var (
@@ -44,19 +45,16 @@ var downloadCmd = &cobra.Command{
 			return
 		}
 
-		vars := []model.Variable{
-			{
-				Name:  "test1",
-				Type:  model.CONFIGMAP,
-				Value: "foo1",
-			},
-			{
-				Name:  "secret1",
-				Type:  model.SECRET,
-				Value: 123,
-			},
+		cfg := config.Get()
+
+		variables, err := inputs.Process(cfg.Definitions)
+
+		if err != nil {
+			log.WithError(err).Error("Error processing variables")
+			return
 		}
-		out.Save("helios", Destination, vars)
+
+		out.Save("helios", Destination, variables)
 	},
 }
 

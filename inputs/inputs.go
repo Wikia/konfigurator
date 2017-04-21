@@ -3,6 +3,7 @@ package inputs
 import (
 	"fmt"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/model"
 )
 
@@ -44,6 +45,7 @@ func GetRegisteredNames() []model.InputType {
 
 func Process(defs []model.VariableDef) ([]model.Variable, error) {
 	ret := []model.Variable{}
+	varSeen := map[string]bool{}
 
 	for _, definition := range defs {
 		processor := Get(definition.Source)
@@ -56,6 +58,16 @@ func Process(defs []model.VariableDef) ([]model.Variable, error) {
 
 		if err != nil {
 			return nil, err
+		}
+
+		varKey := fmt.Sprintf("%s@%s", variable.Name, variable.Type)
+		_, has := varSeen[varKey]
+
+		if has {
+			log.WithField("variable", variable.Name).Warn("Variable was already processed: skipping")
+			continue
+		} else {
+			varSeen[varKey] = true
 		}
 
 		ret = append(ret, *variable)

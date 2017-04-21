@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
@@ -62,7 +61,7 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.WithField("config", viper.ConfigFileUsed()).Info("Config file loaded")
 	} else {
 		log.WithError(err).Error("Error loading config file")
 		os.Exit(-2)

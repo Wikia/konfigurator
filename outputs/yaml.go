@@ -8,7 +8,6 @@ import (
 
 	"github.com/ghodss/yaml"
 
-	"encoding/base64"
 	"encoding/json"
 
 	"github.com/Wikia/konfigurator/model"
@@ -66,14 +65,11 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 	for _, variable := range vars {
 		switch variable.Type {
 		case model.SECRET:
-			secretStr := fmt.Sprintf("%s", variable.Value)
-			encodedText := make([]byte, base64.StdEncoding.EncodedLen(len(secretStr)))
-			base64.StdEncoding.Encode(encodedText, []byte(secretStr))
-			secrets.Data[variable.Name] = encodedText
+			secrets.Data[variable.Name] = []byte(variable.Value.(string))
 			break
 
 		case model.CONFIGMAP:
-			cfgMap.Data[variable.Name] = fmt.Sprintf("%s", variable.Value)
+			cfgMap.Data[variable.Name] = variable.Value.(string)
 			break
 		}
 	}

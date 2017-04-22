@@ -4,7 +4,6 @@ matrix:
   allow_failures:
   - go: master
   include:
-  - go: 1.6.x
   - go: tip
     env: SEND_COVERAGE=0
   - go: master

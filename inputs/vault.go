@@ -21,51 +21,55 @@ type Vault struct {
 	client *api.Client
 }
 
+func (v *Vault) intiClient() error {
+	config := config.Get()
+
+	tr := &http.Transport{}
+	if config.Vault.TLSSkipVerify {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	}
+
+	clientCfg := api.Config{
+		Address:    config.Vault.Address,
+		HttpClient: &http.Client{Transport: tr},
+	}
+
+	var err error
+	v.client, err = api.NewClient(&clientCfg)
+
+	if err != nil {
+		return err
+	}
+
+	// authenticating
+	token := config.Vault.Token
+	if len(token) == 0 {
+		log.Debug("VaultInput: initial token empty - trying to read from file")
+		tokenFile, err := filepath.Abs(config.Vault.TokenPath)
+		if err != nil {
+			return fmt.Errorf("VaultInput: could not get absolute path for token file: %s", err)
+		}
+		contents, err := ioutil.ReadFile(tokenFile)
+		if err != nil {
+			log.WithError(err).WithField("path", tokenFile).Warn("VaultInput: could not read contents of a vault token file")
+		} else {
+			token = string(contents)
+		}
+	}
+
+	v.client.SetToken(token)
+	v.client.Auth()
+}
+
 func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	if variable.Source != model.VAULT {
 		return nil, fmt.Errorf("Invalid variable type: %s for %s", variable.Type, variable.Name)
 	}
 
 	if v.client == nil {
-		config := config.Get()
-
-		tr := &http.Transport{}
-		if config.Input.VaultTLSSkipVerify {
-			tr = &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			}
-		}
-
-		clientCfg := api.Config{
-			Address:    config.Input.VaultAddress,
-			HttpClient: &http.Client{Transport: tr},
-		}
-
-		var err error
-		v.client, err = api.NewClient(&clientCfg)
-
-		if err != nil {
-			return nil, err
-		}
-
-		// authenticating
-		token := config.Input.VaultToken
-		if len(token) == 0 {
-			log.Debug("VaultInput: initial token empty - trying to read from file")
-			tokenFile, err := filepath.Abs(config.Input.VaultTokenPath)
-			if err != nil {
-				return nil, fmt.Errorf("VaultInput: could not get absolute path for token file: %s", err)
-			}
-			contents, err := ioutil.ReadFile(tokenFile)
-			if err != nil {
-				log.WithError(err).WithField("path", tokenFile).Warn("VaultInput: could not read contents of a vault token file")
-			} else {
-				token = string(contents)
-			}
-		}
-
-		v.client.SetToken(token)
-		v.client.Auth()
+		v.intiClient()
 	}
 
 	source := strings.SplitN(variable.Value.(string), ":", 2)

@@ -19,16 +19,20 @@ import (
 type Config struct {
 	LogLevel     string
 	KubeConfPath string
-	Input        InputConfig
+	Vault        VaultConfig
+	Consul       ConsulConfig
 	Definitions  []model.VariableDef
 }
 
-type InputConfig struct {
-	VaultAddress       string
-	VaultToken         string
-	VaultTokenPath     string
-	VaultTLSSkipVerify bool
-	ConsulAddress      string
+type VaultConfig struct {
+	Address       string
+	Token         string
+	TokenPath     string
+	TLSSkipVerify bool
+}
+
+type ConsulConfig struct {
+	Address string
 }
 
 var currentConfig *Config

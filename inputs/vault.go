@@ -61,6 +61,8 @@ func (v *Vault) intiClient() error {
 
 	v.client.SetToken(token)
 	v.client.Auth()
+
+	return nil
 }
 
 func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {

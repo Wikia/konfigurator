@@ -17,8 +17,11 @@ package cmd
 import (
 	"os"
 
+	"path"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/config"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -67,14 +70,20 @@ func initConfig() {
 		os.Exit(-2)
 	}
 
-	viper.SetDefault("LogLevel", "info")
-	logLevel, err := log.ParseLevel(viper.GetString("LogLevel"))
-	if err != nil {
-		log.WithError(err).Error("Error parsing LogLevel")
+	viper.SetDefault("loglevel", "info")
+	viper.SetDefault("vault.tokenpath", path.Join(homedir.Dir(), ".vault-token"))
+
+	cfg := config.Get()
+	if err := viper.Unmarshal(&cfg); err != nil {
+		log.WithError(err).Error("Error parsing config file")
 		os.Exit(-3)
 	}
 
+	logLevel, err := log.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		log.WithError(err).Error("Error parsing LogLevel")
+		os.Exit(-4)
+	}
+
 	log.SetLevel(logLevel)
-	cfg := config.Get()
-	viper.UnmarshalKey("variables", &cfg.Definitions)
 }

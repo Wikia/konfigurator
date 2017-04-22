@@ -46,6 +46,8 @@ var downloadCmd = &cobra.Command{
 		}
 
 		cfg := config.Get()
+		//log.WithField("cfg", cfg).Debug("cfg")
+		//log.WithField("settings", viper.AllSettings()).Debug("settings")
 
 		variables, err := inputs.Process(cfg.Definitions)
 

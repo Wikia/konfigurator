@@ -17,6 +17,10 @@ import:
   version: ^0.7.0
   subpackages:
   - api
+- package: github.com/hashicorp/consul
+  version: ^0.8.1
+  subpackages:
+  - api
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.3.1

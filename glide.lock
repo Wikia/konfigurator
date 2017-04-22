@@ -1,5 +1,5 @@
-hash: 96ef3722ac7069090a1b474973351e5457e4cd664cfafe87c257a7283a159015
-updated: 2017-04-22T22:51:11.981954169+02:00
+hash: cf244c04794f6a12db7401556c693e8ede7f6a17acd27aaa7c7444d75d623b9d
+updated: 2017-04-23T00:43:02.686832264+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -37,6 +37,10 @@ imports:
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
+- name: github.com/hashicorp/consul
+  version: e9ca44d0a1757ac9aecc6785904a701936c10e4a
+  subpackages:
+  - api
 - name: github.com/hashicorp/errwrap
   version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
 - name: github.com/hashicorp/go-cleanhttp
@@ -56,6 +60,10 @@ imports:
   - json/parser
   - json/scanner
   - json/token
+- name: github.com/hashicorp/serf
+  version: 65c2babe73c7a096cd24e9eeec67613eb4e436c9
+  subpackages:
+  - coordinate
 - name: github.com/hashicorp/vault
   version: 614deacfca3f3b7162bbf30a36d6fc7362cd47f0
   subpackages:

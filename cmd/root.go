@@ -17,11 +17,8 @@ package cmd
 import (
 	"os"
 
-	"path"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/config"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -69,9 +66,6 @@ func initConfig() {
 		log.WithError(err).Error("Error loading config file")
 		os.Exit(-2)
 	}
-
-	viper.SetDefault("loglevel", "info")
-	viper.SetDefault("vault.tokenpath", path.Join(homedir.Dir(), ".vault-token"))
 
 	cfg := config.Get()
 	if err := viper.Unmarshal(&cfg); err != nil {

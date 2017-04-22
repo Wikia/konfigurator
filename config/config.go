@@ -7,10 +7,13 @@ import (
 
 	"path"
 
+	"os"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/model"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	viper "github.com/spf13/viper"
 )
 
 type Config struct {
@@ -43,10 +46,20 @@ func Setup(cmd *cobra.Command) error {
 		levels[i] = fmt.Sprintf("%s", level)
 	}
 
+	homeDir, err := homedir.Dir()
+	if err != nil {
+		log.WithError(err).Warn("Error getting user home dir - using current working dir")
+		homeDir, _ = os.Getwd()
+	}
+
+	tokenDir := path.Join(homeDir, ".vault-token")
+	viper.SetDefault("loglevel", "info")
+	viper.SetDefault("vault.tokenpath", tokenDir)
+
 	cmd.PersistentFlags().String("kubeConf", "", "Path to a kubeconf config file")
 	cmd.PersistentFlags().String("vaultAddress", "", "Address to a Vault server")
 	cmd.PersistentFlags().String("vaultToken", "", "Token to be used when authenticating with Vault (overrides vaultTokenPath)")
-	cmd.PersistentFlags().String("vaultTokenPath", path.Join(homedir.Dir(), ".vault-token"), "Path to a file with Vault token")
+	cmd.PersistentFlags().String("vaultTokenPath", tokenDir, "Path to a file with Vault token")
 	cmd.PersistentFlags().Bool("vaultTlsSkipVerify", false, "Should TLS certificate be verified")
 	cmd.PersistentFlags().String("consulAddress", "consul.service.consul", "Address to a Consul server")
 	cmd.PersistentFlags().String("consulToken", "", "Token to be used when authenticating with Consul")

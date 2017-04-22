@@ -5,7 +5,7 @@ type InputType string
 const (
 	SIMPLE  InputType = "simple"
 	POD               = "pod"
-	VAULT             = "valut"
+	VAULT             = "vault"
 	FILE              = "file"
 	PODYAML           = "pod_yaml"
 )

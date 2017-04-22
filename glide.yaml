@@ -13,6 +13,10 @@ import:
 - package: k8s.io/client-go
   subpackages:
   - pkg/api/v1
+- package: github.com/hashicorp/vault
+  version: ^0.7.0
+  subpackages:
+  - api
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.3.1

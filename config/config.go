@@ -56,6 +56,7 @@ func Setup(cmd *cobra.Command) error {
 	viper.SetDefault("loglevel", "info")
 	viper.SetDefault("vault.tokenpath", tokenDir)
 
+	cmd.PersistentFlags().String("logLevel", "info", fmt.Sprintf("What type of logs should be emited (available: %s)", strings.Join(levels, ", ")))
 	cmd.PersistentFlags().String("kubeConf", "", "Path to a kubeconf config file")
 	cmd.PersistentFlags().String("vaultAddress", "", "Address to a Vault server")
 	cmd.PersistentFlags().String("vaultToken", "", "Token to be used when authenticating with Vault (overrides vaultTokenPath)")
@@ -65,7 +66,17 @@ func Setup(cmd *cobra.Command) error {
 	cmd.PersistentFlags().String("consulToken", "", "Token to be used when authenticating with Consul")
 	cmd.PersistentFlags().String("consulDatacenter", "", "Datacenter to be used in Consul")
 	cmd.PersistentFlags().Bool("consulTlsSkipVerify", false, "Should TLS certificate be verified")
-	cmd.PersistentFlags().String("logLevel", "info", fmt.Sprintf("What type of logs should be emited (available: %s)", strings.Join(levels, ", ")))
+
+	viper.BindPFlag("loglevel", cmd.PersistentFlags().Lookup("logLevel"))
+	viper.BindPFlag("kubeconf", cmd.PersistentFlags().Lookup("kubeConf"))
+	viper.BindPFlag("vault.address", cmd.PersistentFlags().Lookup("vaultAddress"))
+	viper.BindPFlag("vault.token", cmd.PersistentFlags().Lookup("vaultToken"))
+	viper.BindPFlag("vault.tokenpath", cmd.PersistentFlags().Lookup("vaultTokenPath"))
+	viper.BindPFlag("vault.tlsskipverify", cmd.PersistentFlags().Lookup("vaultTlsSkipVerify"))
+	viper.BindPFlag("consul.address", cmd.PersistentFlags().Lookup("consulAddress"))
+	viper.BindPFlag("consul.token", cmd.PersistentFlags().Lookup("consulToken"))
+	viper.BindPFlag("consul.datacenter", cmd.PersistentFlags().Lookup("consulDatacenter"))
+	viper.BindPFlag("consul.tlsskipverify", cmd.PersistentFlags().Lookup("consulTlsSkipVerify"))
 
 	return nil
 }

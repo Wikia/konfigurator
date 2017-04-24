@@ -29,8 +29,9 @@
     "go-vet",
     "go-test"
   ],
-  "BuildConstraints": "linux,darwin,windows",
+  "BuildConstraints": "linux,darwin,windows,!arm",
   "BuildSettings": {
+    "LdFlags": "-s",
     "LdFlagsXVars": {
       "TimeNow": "github.com/Wikia/konfigurator/main.BuildTime",
       "Version": "github.com/Wikia/konfigurator/main.Version"

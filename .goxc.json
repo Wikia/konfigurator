@@ -29,7 +29,7 @@
     "go-vet",
     "go-test"
   ],
-  "BuildConstraints": "linux,darwin,windows,!arm",
+  "BuildConstraints": "linux,darwin,windows,!arm,!386",
   "BuildSettings": {
     "LdFlags": "-s",
     "LdFlagsXVars": {

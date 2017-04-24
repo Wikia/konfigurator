@@ -30,6 +30,7 @@ import (
 var (
 	OutputFmt   string
 	Destination string
+	ServiceName string
 )
 
 // downloadCmd represents the download command
@@ -45,10 +46,12 @@ var downloadCmd = &cobra.Command{
 			return
 		}
 
-		cfg := config.Get()
-		//log.WithField("cfg", cfg).Debug("cfg")
-		//log.WithField("settings", viper.AllSettings()).Debug("settings")
+		if len(ServiceName) == 0 {
+			log.Error("Missing service name")
+			return
+		}
 
+		cfg := config.Get()
 		variables, err := inputs.Process(cfg.Definitions)
 
 		if err != nil {
@@ -56,7 +59,7 @@ var downloadCmd = &cobra.Command{
 			return
 		}
 
-		out.Save("helios", Destination, variables)
+		out.Save(ServiceName, Destination, variables)
 	},
 }
 
@@ -70,4 +73,5 @@ func init() {
 	}
 	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
 	downloadCmd.Flags().StringVarP(&Destination, "destination", "d", workingDir, "Where to store the output files")
+	downloadCmd.Flags().StringVarP(&ServiceName, "serviceName", "s", "", "What is the service name which settings will be downloaded as")
 }

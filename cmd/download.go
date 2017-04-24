@@ -38,29 +38,34 @@ var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download configuration and stores it locally",
 	Long:  `Fetches configuration for configured sources and stores it locally`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		out := outputs.Get(OutputFmt)
 
 		if out == nil {
-			log.WithField("output", OutputFmt).Error("Unknown output format")
-			return
+			return fmt.Errorf("Unknown output format: %s", OutputFmt)
 		}
 
 		if len(ServiceName) == 0 {
-			log.Error("Missing service name")
-			return
+			return fmt.Errorf("Missing service name")
 		}
 
 		cfg := config.Get()
 		variables, err := inputs.Process(cfg.Definitions)
 
 		if err != nil {
-			log.WithError(err).Error("Error processing variables")
-			return
+			return fmt.Errorf("Error processing variables: %s", err)
 		}
 
-		out.Save(ServiceName, Destination, variables)
+		err = out.Save(ServiceName, Destination, variables)
+
+		if err != nil {
+			return fmt.Errorf("Error saving variables: %s", err)
+		}
+
+		return nil
 	},
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
 func init() {

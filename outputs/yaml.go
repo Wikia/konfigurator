@@ -1,14 +1,8 @@
 package outputs
 
 import (
-	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
-
-	"github.com/ghodss/yaml"
-
-	"encoding/json"
 
 	"github.com/Wikia/konfigurator/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,20 +17,6 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 	if err != nil {
 		return err
 	}
-
-	cfgFile, err := os.Create(filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
-	if err != nil {
-		return err
-	}
-
-	defer cfgFile.Close()
-
-	secretFile, err := os.Create(filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
-	if err != nil {
-		return err
-	}
-
-	defer secretFile.Close()
 
 	cfgMap := v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -74,37 +54,13 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 		}
 	}
 
-	jsonData, err := json.Marshal(&cfgMap)
-	if err != nil {
-		return err
-	}
-
-	output, err := yaml.JSONToYAML(jsonData)
-	if err != nil {
-		return err
-	}
-
-	output = bytes.Replace(output, []byte("  creationTimestamp: null\n"), []byte(""), 1)
-
-	_, err = cfgFile.Write(output)
+	err = model.WriteConfigMap(&cfgMap, filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
 
 	if err != nil {
 		return err
 	}
 
-	jsonData, err = json.Marshal(&secrets)
-	if err != nil {
-		return err
-	}
-
-	output, err = yaml.JSONToYAML(jsonData)
-	if err != nil {
-		return err
-	}
-
-	output = bytes.Replace(output, []byte("  creationTimestamp: null\n"), []byte(""), 1)
-
-	_, err = secretFile.Write(output)
+	err = model.WriteSecrets(&secrets, filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
 
 	if err != nil {
 		return err

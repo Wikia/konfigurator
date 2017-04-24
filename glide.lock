@@ -1,5 +1,5 @@
 hash: cf244c04794f6a12db7401556c693e8ede7f6a17acd27aaa7c7444d75d623b9d
-updated: 2017-04-23T00:43:02.686832264+02:00
+updated: 2017-04-24T23:52:57.484347758+02:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
@@ -14,6 +14,7 @@ imports:
   version: 09691a3b6378b740595c1002f40c34dd5f218a22
   subpackages:
   - log
+  - swagger
 - name: github.com/fatih/structs
   version: a720dfa8df582c51dee1b36feabb906bde1588bd
 - name: github.com/fsnotify/fsnotify
@@ -103,7 +104,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 10f6b9d7e1631a54ad07c5c0fb71c28a1abfd3c2
+  version: f4f10f6873175e78bb1503da7e78c260a7f3ef63
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
@@ -186,6 +187,7 @@ imports:
   - pkg/api
   - pkg/api/v1
   - pkg/apis/extensions
+  - pkg/apis/extensions/v1beta1
   - pkg/util
   - pkg/util/parsers
 testImports:

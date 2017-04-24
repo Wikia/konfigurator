@@ -23,11 +23,12 @@ import (
 )
 
 var (
-	DeploymentFile string
-	Overwrite      bool
-	ConfigFile     string
-	SecretsFile    string
-	ContainerName  string
+	DeploymentFile  string
+	Overwrite       bool
+	ConfigFile      string
+	SecretsFile     string
+	ContainerName   string
+	DestinationFile string
 )
 
 // updateCmd represents the update command
@@ -51,6 +52,10 @@ to defined variables`,
 
 		if len(ContainerName) == 0 {
 			return fmt.Errorf("Missing container name")
+		}
+
+		if len(DestinationFile) == 0 {
+			return fmt.Errorf("Missing destination file")
 		}
 
 		secret, _, err := model.ReadSecrets(SecretsFile)
@@ -79,7 +84,7 @@ to defined variables`,
 			return fmt.Errorf("Error updating deployment: %s", err)
 		}
 
-		err = model.WriteDeployment(deployment, leftOver, "./test.yml")
+		err = model.WriteDeployment(deployment, leftOver, DestinationFile)
 
 		if err != nil {
 			return err
@@ -98,5 +103,6 @@ func init() {
 	updateCmd.Flags().StringVarP(&ContainerName, "containerName", "t", "", "Name of the container to modify in deployment")
 	updateCmd.Flags().StringVarP(&ConfigFile, "configMap", "m", "", "File where ConfigMap definitions are stored")
 	updateCmd.Flags().StringVarP(&SecretsFile, "secrets", "s", "", "File where Secrets are stored")
+	updateCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write deployment")
 	updateCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
 }

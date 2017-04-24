@@ -28,9 +28,9 @@ import (
 )
 
 var (
-	OutputFmt   string
-	Destination string
-	ServiceName string
+	OutputFmt       string
+	DestinationPath string
+	ServiceName     string
 )
 
 // downloadCmd represents the download command
@@ -56,7 +56,7 @@ var downloadCmd = &cobra.Command{
 			return fmt.Errorf("Error processing variables: %s", err)
 		}
 
-		err = out.Save(ServiceName, Destination, variables)
+		err = out.Save(ServiceName, DestinationPath, variables)
 
 		if err != nil {
 			return fmt.Errorf("Error saving variables: %s", err)
@@ -77,6 +77,6 @@ func init() {
 		os.Exit(-6)
 	}
 	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
-	downloadCmd.Flags().StringVarP(&Destination, "destination", "d", workingDir, "Where to store the output files")
+	downloadCmd.Flags().StringVarP(&DestinationPath, "destinationFolder", "d", workingDir, "Where to store the output files")
 	downloadCmd.Flags().StringVarP(&ServiceName, "serviceName", "s", "", "What is the service name which settings will be downloaded as")
 }

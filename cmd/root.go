@@ -68,7 +68,7 @@ func initConfig() {
 	}
 
 	cfg := config.Get()
-	if err := viper.Unmarshal(&cfg); err != nil {
+	if err := viper.Unmarshal(cfg); err != nil {
 		log.WithError(err).Error("Error parsing config file")
 		os.Exit(-3)
 	}

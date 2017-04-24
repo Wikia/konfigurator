@@ -1,8 +1,12 @@
 package model
 
-type VariableType string
+type InputType string
 
 const (
-	CONFIGMAP VariableType = "config"
-	SECRET                 = "secret"
+	SIMPLE  InputType = "simple"
+	POD               = "pod"
+	VAULT             = "vault"
+	CONSUL            = "consul"
+	FILE              = "file"
+	PODYAML           = "pod_yaml"
 )

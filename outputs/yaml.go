@@ -1,43 +1,22 @@
 package outputs
 
 import (
-	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
-
-	"github.com/ghodss/yaml"
-
-	"encoding/base64"
-	"encoding/json"
 
 	"github.com/Wikia/konfigurator/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/pkg/api/v1"
 )
 
-type OutputYaml struct{}
+type OutputK8SYaml struct{}
 
-func (o *OutputYaml) Save(name string, destination string, vars []model.Variable) error {
+func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Variable) error {
 	destinationPath, err := filepath.Abs(destination)
 
 	if err != nil {
 		return err
 	}
-
-	cfgFile, err := os.Create(filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
-	if err != nil {
-		return err
-	}
-
-	defer cfgFile.Close()
-
-	secretFile, err := os.Create(filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
-	if err != nil {
-		return err
-	}
-
-	defer secretFile.Close()
 
 	cfgMap := v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -66,49 +45,22 @@ func (o *OutputYaml) Save(name string, destination string, vars []model.Variable
 	for _, variable := range vars {
 		switch variable.Type {
 		case model.SECRET:
-			secretStr := fmt.Sprintf("%s", variable.Value)
-			encodedText := make([]byte, base64.StdEncoding.EncodedLen(len(secretStr)))
-			base64.StdEncoding.Encode(encodedText, []byte(secretStr))
-			secrets.Data[variable.Name] = encodedText
+			secrets.Data[variable.Name] = []byte(variable.Value.(string))
 			break
 
 		case model.CONFIGMAP:
-			cfgMap.Data[variable.Name] = fmt.Sprintf("%s", variable.Value)
+			cfgMap.Data[variable.Name] = variable.Value.(string)
 			break
 		}
 	}
 
-	jsonData, err := json.Marshal(&cfgMap)
-	if err != nil {
-		return err
-	}
-
-	output, err := yaml.JSONToYAML(jsonData)
-	if err != nil {
-		return err
-	}
-
-	output = bytes.Replace(output, []byte("  creationTimestamp: null\n"), []byte(""), 1)
-
-	_, err = cfgFile.Write(output)
+	err = model.WriteConfigMap(&cfgMap, [][]byte{}, filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
 
 	if err != nil {
 		return err
 	}
 
-	jsonData, err = json.Marshal(&secrets)
-	if err != nil {
-		return err
-	}
-
-	output, err = yaml.JSONToYAML(jsonData)
-	if err != nil {
-		return err
-	}
-
-	output = bytes.Replace(output, []byte("  creationTimestamp: null\n"), []byte(""), 1)
-
-	_, err = secretFile.Write(output)
+	err = model.WriteSecrets(&secrets, [][]byte{}, filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
 
 	if err != nil {
 		return err
@@ -118,5 +70,5 @@ func (o *OutputYaml) Save(name string, destination string, vars []model.Variable
 }
 
 func init() {
-	Register("yaml", &OutputYaml{})
+	Register("k8s-yaml", &OutputK8SYaml{})
 }

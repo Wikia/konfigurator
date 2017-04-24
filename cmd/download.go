@@ -17,18 +17,20 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/Wikia/konfigurator/inputs"
 	"github.com/Wikia/konfigurator/outputs"
 	"github.com/spf13/cobra"
 
 	"os"
 
-	"github.com/Wikia/konfigurator/model"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
+	"github.com/Wikia/konfigurator/config"
 )
 
 var (
 	OutputFmt   string
 	Destination string
+	ServiceName string
 )
 
 // downloadCmd represents the download command
@@ -36,29 +38,34 @@ var downloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: "Download configuration and stores it locally",
 	Long:  `Fetches configuration for configured sources and stores it locally`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		out := outputs.Get(OutputFmt)
 
 		if out == nil {
-			log.WithField("output", OutputFmt).Error("Unknown output format")
-			return
+			return fmt.Errorf("Unknown output format: %s", OutputFmt)
 		}
 
-		yamlOut := outputs.Get("yaml")
-		vars := []model.Variable{
-			{
-				Name:  "test1",
-				Type:  model.CONFIGMAP,
-				Value: "foo1",
-			},
-			{
-				Name:  "secret1",
-				Type:  model.SECRET,
-				Value: 123,
-			},
+		if len(ServiceName) == 0 {
+			return fmt.Errorf("Missing service name")
 		}
-		yamlOut.Save("helios", Destination, vars)
+
+		cfg := config.Get()
+		variables, err := inputs.Process(cfg.Definitions)
+
+		if err != nil {
+			return fmt.Errorf("Error processing variables: %s", err)
+		}
+
+		err = out.Save(ServiceName, Destination, variables)
+
+		if err != nil {
+			return fmt.Errorf("Error saving variables: %s", err)
+		}
+
+		return nil
 	},
+	SilenceErrors: true,
+	SilenceUsage:  true,
 }
 
 func init() {
@@ -69,6 +76,7 @@ func init() {
 		log.WithError(err).Error("Error getting working directory")
 		os.Exit(-6)
 	}
-	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
+	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
 	downloadCmd.Flags().StringVarP(&Destination, "destination", "d", workingDir, "Where to store the output files")
+	downloadCmd.Flags().StringVarP(&ServiceName, "serviceName", "s", "", "What is the service name which settings will be downloaded as")
 }

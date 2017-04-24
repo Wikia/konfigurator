@@ -15,10 +15,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
+	"github.com/Wikia/konfigurator/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -30,8 +30,8 @@ var RootCmd = &cobra.Command{
 	Use:   "konfigurator",
 	Short: "Tool for managing service configuration running on k8s",
 	Long: `This tool fetches configuration from various backends
-	and saves it as k8s ConfigMaps or Secrets. Additionally it can
-	produce direnv or shell compatible file used for local development`,
+and saves it as k8s ConfigMaps or Secrets. Additionally it can
+produce direnv or shell compatible file used for local development`,
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -45,7 +45,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
+	config.Setup(RootCmd)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.konfigurator.yaml)")
 }
 
@@ -61,17 +61,22 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.WithField("config", viper.ConfigFileUsed()).Info("Config file loaded")
 	} else {
 		log.WithError(err).Error("Error loading config file")
 		os.Exit(-2)
 	}
 
-	viper.SetDefault("logLevel", "info")
-	logLevel, err := log.ParseLevel(viper.GetString("logLevel"))
-	if err != nil {
-		log.WithError(err).Error("Error parsing logLevel")
+	cfg := config.Get()
+	if err := viper.Unmarshal(&cfg); err != nil {
+		log.WithError(err).Error("Error parsing config file")
 		os.Exit(-3)
+	}
+
+	logLevel, err := log.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		log.WithError(err).Error("Error parsing LogLevel")
+		os.Exit(-4)
 	}
 
 	log.SetLevel(logLevel)

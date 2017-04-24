@@ -2,7 +2,7 @@ sudo: false
 language: go
 matrix:
   allow_failures:
-  - go: master
+  - go: tip
   include:
   - go: tip
     env: SEND_COVERAGE=0

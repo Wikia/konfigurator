@@ -15,33 +15,39 @@ import (
 
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	v1 "k8s.io/client-go/pkg/api/v1"
 	v1beta1 "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 var (
-	timeStampRegex   = regexp.MustCompile(`\s+creationTimestamp: null`)
-	emptyStructRegex = regexp.MustCompile(`\s+(?:status|selector|strategy): {}`)
+	timeStampRegex        = regexp.MustCompile(`\s+creationTimestamp: null`)
+	emptyStructRegex      = regexp.MustCompile(`\s+(?:status|selector|strategy): {}`)
+	yamlDocumentSeparator = []byte("---\n")
 )
 
 func splitYamlDocument(contents []byte) [][]byte {
-	return bytes.Split(contents, []byte("---\n"))
+	return bytes.Split(contents, yamlDocumentSeparator)
 }
 
-func ReadSecrets(filePath string) (*v1.Secret, error) {
+func ReadSecrets(filePath string) (*v1.Secret, [][]byte, error) {
 	contents, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	secret := v1.Secret{}
+	idx := 0
+	var document []byte
+	documents := splitYamlDocument(contents)
 
-	for _, document := range splitYamlDocument(contents) {
+	for idx, document = range documents {
 		err = yaml.Unmarshal(document, &secret)
 
 		if err != nil {
-			return nil, err
+			log.WithError(err).Warn("Error parsing YAML document")
+			continue
 		}
 
 		if secret.Kind == "Secret" {
@@ -50,30 +56,34 @@ func ReadSecrets(filePath string) (*v1.Secret, error) {
 	}
 
 	if secret.Kind != "Secret" {
-		return nil, fmt.Errorf("Could not unmarshall Secrets")
+		return nil, nil, fmt.Errorf("Could not unmarshall Secrets")
 	}
 
-	return &secret, nil
+	return &secret, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteSecrets(secret *v1.Secret, filePath string) error {
-	return writeK8sYaml(secret, filePath)
+func WriteSecrets(secret *v1.Secret, leftOver [][]byte, filePath string) error {
+	return writeK8sYaml(secret, leftOver, filePath)
 }
 
-func ReadConfigMap(filePath string) (*v1.ConfigMap, error) {
+func ReadConfigMap(filePath string) (*v1.ConfigMap, [][]byte, error) {
 	contents, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	configMap := v1.ConfigMap{}
+	idx := 0
+	var document []byte
+	documents := splitYamlDocument(contents)
 
-	for _, document := range splitYamlDocument(contents) {
+	for idx, document = range documents {
 		err = yaml.Unmarshal(document, &configMap)
 
 		if err != nil {
-			return nil, err
+			log.WithError(err).Warn("Error parsing YAML document")
+			continue
 		}
 
 		if configMap.Kind == "ConfigMap" {
@@ -82,30 +92,34 @@ func ReadConfigMap(filePath string) (*v1.ConfigMap, error) {
 	}
 
 	if configMap.Kind != "ConfigMap" {
-		return nil, fmt.Errorf("Could not unmarshall ConfigMap")
+		return nil, nil, fmt.Errorf("Could not unmarshall ConfigMap")
 	}
 
-	return &configMap, nil
+	return &configMap, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteConfigMap(configMap *v1.ConfigMap, filePath string) error {
-	return writeK8sYaml(configMap, filePath)
+func WriteConfigMap(configMap *v1.ConfigMap, leftOver [][]byte, filePath string) error {
+	return writeK8sYaml(configMap, leftOver, filePath)
 }
 
-func ReadDeployment(filePath string) (*v1beta1.Deployment, error) {
+func ReadDeployment(filePath string) (*v1beta1.Deployment, [][]byte, error) {
 	contents, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	deployment := v1beta1.Deployment{}
+	idx := 0
+	var document []byte
+	documents := splitYamlDocument(contents)
 
-	for _, document := range splitYamlDocument(contents) {
+	for idx, document = range splitYamlDocument(contents) {
 		err = yaml.Unmarshal(document, &deployment)
 
 		if err != nil {
-			return nil, err
+			log.WithError(err).Warn("Error parsing YAML document")
+			continue
 		}
 
 		if deployment.Kind == "Deployment" {
@@ -114,17 +128,17 @@ func ReadDeployment(filePath string) (*v1beta1.Deployment, error) {
 	}
 
 	if deployment.Kind != "Deployment" {
-		return nil, fmt.Errorf("Could not unmarshall Deployment")
+		return nil, nil, fmt.Errorf("Could not unmarshall Deployment")
 	}
 
-	return &deployment, nil
+	return &deployment, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteDeployment(deployment *v1beta1.Deployment, filePath string) error {
-	return writeK8sYaml(deployment, filePath)
+func WriteDeployment(deployment *v1beta1.Deployment, leftOver [][]byte, filePath string) error {
+	return writeK8sYaml(deployment, leftOver, filePath)
 }
 
-func writeK8sYaml(data interface{}, filePath string) error {
+func writeK8sYaml(data interface{}, leftOver [][]byte, filePath string) error {
 	secretFile, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -145,7 +159,9 @@ func writeK8sYaml(data interface{}, filePath string) error {
 	output = timeStampRegex.ReplaceAll(output, []byte(""))
 	output = emptyStructRegex.ReplaceAll(output, []byte(""))
 
-	_, err = secretFile.Write(output)
+	leftOver = append(leftOver, output)
+
+	_, err = secretFile.Write(bytes.Join(leftOver, yamlDocumentSeparator))
 
 	if err != nil {
 		return err

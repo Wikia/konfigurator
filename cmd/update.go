@@ -53,19 +53,19 @@ to defined variables`,
 			return fmt.Errorf("Missing container name")
 		}
 
-		secret, err := model.ReadSecrets(SecretsFile)
+		secret, _, err := model.ReadSecrets(SecretsFile)
 
 		if err != nil {
 			return err
 		}
 
-		configMap, err := model.ReadConfigMap(ConfigFile)
+		configMap, _, err := model.ReadConfigMap(ConfigFile)
 
 		if err != nil {
 			return err
 		}
 
-		deployment, err := model.ReadDeployment(DeploymentFile)
+		deployment, leftOver, err := model.ReadDeployment(DeploymentFile)
 
 		if err != nil {
 			return err
@@ -79,7 +79,7 @@ to defined variables`,
 			return fmt.Errorf("Error updating deployment: %s", err)
 		}
 
-		err = model.WriteDeployment(deployment, "./test.yml")
+		err = model.WriteDeployment(deployment, leftOver, "./test.yml")
 
 		if err != nil {
 			return err

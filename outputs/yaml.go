@@ -54,13 +54,13 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 		}
 	}
 
-	err = model.WriteConfigMap(&cfgMap, filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
+	err = model.WriteConfigMap(&cfgMap, [][]byte{}, filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
 
 	if err != nil {
 		return err
 	}
 
-	err = model.WriteSecrets(&secrets, filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
+	err = model.WriteSecrets(&secrets, [][]byte{}, filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
 
 	if err != nil {
 		return err

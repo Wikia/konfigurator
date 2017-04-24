@@ -33,6 +33,7 @@ deploy:
   file_glob: true
   file:
   - "$HOME/gopath/bin/konfigurator-xc/*/konfigurator_*.tar.gz"
+  - "$HOME/gopath/bin/konfigurator-xc/*/konfigurator_*.zip"
   - "$HOME/gopath/bin/konfigurator-xc/*/konfigurator_*.deb"
   skip_cleanup: true
   on:

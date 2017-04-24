@@ -14,8 +14,8 @@
       "bin-dir": "/usr/bin",
       "go-sources-dir": ".",
       "metadata": {
-        "maintainer": "Łukasz Harasimowicz",
-        "maintainerEmail": "dev@harnash.eu"
+        "maintainer": "Platform Team",
+        "maintainerEmail": "platofrm-l@fandom.com"
       },
       "metadata-deb": {
         "Build-Depends": "debhelper (>=4.0.0), golang-go, gcc",
@@ -29,7 +29,7 @@
     "go-vet",
     "go-test"
   ],
-  "BuildConstraints": "linux,darwin",
+  "BuildConstraints": "linux,darwin,windows",
   "BuildSettings": {
     "LdFlagsXVars": {
       "TimeNow": "github.com/Wikia/konfigurator/main.BuildTime",

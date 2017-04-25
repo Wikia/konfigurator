@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/Wikia/konfigurator/helpers"
 	v1 "k8s.io/client-go/pkg/api/v1"
 	v1beta1 "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
@@ -138,7 +139,24 @@ func WriteDeployment(deployment *v1beta1.Deployment, leftOver [][]byte, filePath
 	return writeK8sYaml(deployment, leftOver, filePath)
 }
 
-func writeK8sYaml(data interface{}, leftOver [][]byte, filePath string) error {
+func marshalK8sEntity(obj interface{}) ([]byte, error) {
+	jsonData, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := yaml.JSONToYAML(jsonData)
+	if err != nil {
+		return nil, err
+	}
+
+	output = timeStampRegex.ReplaceAll(output, []byte(""))
+	output = emptyStructRegex.ReplaceAll(output, []byte(""))
+
+	return output, nil
+}
+
+func writeK8sYaml(obj interface{}, leftOver [][]byte, filePath string) error {
 	secretFile, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -146,18 +164,11 @@ func writeK8sYaml(data interface{}, leftOver [][]byte, filePath string) error {
 
 	defer secretFile.Close()
 
-	jsonData, err := json.Marshal(data)
+	output, err := marshalK8sEntity(obj)
+
 	if err != nil {
 		return err
 	}
-
-	output, err := yaml.JSONToYAML(jsonData)
-	if err != nil {
-		return err
-	}
-
-	output = timeStampRegex.ReplaceAll(output, []byte(""))
-	output = emptyStructRegex.ReplaceAll(output, []byte(""))
 
 	leftOver = append(leftOver, output)
 
@@ -166,6 +177,24 @@ func writeK8sYaml(data interface{}, leftOver [][]byte, filePath string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func DiffDeploymets(deployment1 *v1beta1.Deployment, deployment2 *v1beta1.Deployment) error {
+	deployYaml1, err := marshalK8sEntity(deployment1)
+
+	if err != nil {
+		return err
+	}
+
+	deployYaml2, err := marshalK8sEntity(deployment2)
+
+	if err != nil {
+		return err
+	}
+
+	helpers.RenderDiff(os.Stdout, string(deployYaml1), string(deployYaml2))
 
 	return nil
 }

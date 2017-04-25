@@ -18,8 +18,11 @@ import (
 	"fmt"
 
 	"github.com/Wikia/konfigurator/config"
+	"github.com/Wikia/konfigurator/helpers"
 	"github.com/Wikia/konfigurator/model"
+	"github.com/mohae/deepcopy"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 var (
@@ -29,6 +32,7 @@ var (
 	SecretsFile     string
 	ContainerName   string
 	DestinationFile string
+	NoConfirm       bool
 )
 
 // updateCmd represents the update command
@@ -76,12 +80,28 @@ to defined variables`,
 			return err
 		}
 
-		cfg := config.Get()
+		// keeping old copy for diff
+		oldDeployment := deepcopy.Copy(deployment).(*v1beta1.Deployment)
 
+		cfg := config.Get()
 		err = model.UpdateDeployment(deployment, configMap, secret, ContainerName, cfg.Definitions, Overwrite)
 
 		if err != nil {
 			return fmt.Errorf("Error updating deployment: %s", err)
+		}
+
+		if !NoConfirm {
+			model.DiffDeploymets(oldDeployment, deployment)
+
+			confirm, err := helpers.AskConfirm("Apply changes?")
+
+			if err != nil {
+				return err
+			}
+
+			if !confirm {
+				return nil
+			}
 		}
 
 		err = model.WriteDeployment(deployment, leftOver, DestinationFile)
@@ -104,5 +124,6 @@ func init() {
 	updateCmd.Flags().StringVarP(&ConfigFile, "configMap", "m", "", "File where ConfigMap definitions are stored")
 	updateCmd.Flags().StringVarP(&SecretsFile, "secrets", "s", "", "File where Secrets are stored")
 	updateCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write deployment")
+	updateCmd.Flags().BoolVarP(&NoConfirm, "yes", "y", false, "Answer all questions 'yes' - no confirmations and interaction")
 	updateCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
 }

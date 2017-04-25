@@ -1,4 +1,4 @@
-# konfigurator [![Build Status](https://travis-ci.com/Wikia/konfigurator.svg?token=8Hc4nTuxXPoC7GveyjkW&branch=master)](https://travis-ci.com/Wikia/konfigurator)
+# konfigurator [![Build Status](https://travis-ci.org/Wikia/konfigurator.svg?branch=master)](https://travis-ci.org/Wikia/konfigurator)
 
 ## Sample configuration
 

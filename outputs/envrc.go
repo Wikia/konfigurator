@@ -27,6 +27,10 @@ func (o *OutputEnvrc) Save(name string, destination string, vars []model.Variabl
 	defer cfgFile.Close()
 
 	for _, variable := range vars {
+		if variable.Type == model.REFERENCE {
+			continue
+		}
+
 		_, err = cfgFile.WriteString(fmt.Sprintf("export %s=\"%s\"\n", strings.ToUpper(variable.Name), variable.Value))
 
 		if err != nil {

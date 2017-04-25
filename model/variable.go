@@ -5,6 +5,7 @@ type VariableType string
 const (
 	CONFIGMAP VariableType = "config"
 	SECRET                 = "secret"
+	REFERENCE              = "reference"
 )
 
 type VariableDef struct {

@@ -32,6 +32,11 @@ Definitions:
     type: config
     source: consul
     value: config/base/dev/DATACENTER
+  # This value refences internal k8s variables available inside POD
+  - name: ReferencedValue
+    type: reference
+    source: simple
+    value: spec.nodeName
 ```
 
 ## Available commands
@@ -39,6 +44,11 @@ Definitions:
 ### download
 This command will fetch all the variables from the defined sources and put them in proper file(s).
  
+#### Available types:
+* **config** - values will be put into ConfigMaps
+* **secret** - values will be encoded and put into Secrets
+* **reference** - values will be put into Deployment as reference to other POD variables
+
 #### Available sources:
 * **simple** - values are stored statically in the configuration file
 * **vault** - values are fetched from the Vault server (you will need proper token to authorize with the server)
@@ -47,6 +57,8 @@ This command will fetch all the variables from the defined sources and put them 
 #### Available output formats:
 * **k8s-yaml** - will save configuration into Secret and ConfigMap YAMLs for use with kubectl
 * **envrc** - will save all configuration into shell compatible file for use in local development or testing
+
+When outputing `envrc` values with type `reference` will be omitted.
 
 #### options
 ```

@@ -46,11 +46,10 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 		switch variable.Type {
 		case model.SECRET:
 			secrets.Data[variable.Name] = []byte(variable.Value.(string))
-			break
-
 		case model.CONFIGMAP:
 			cfgMap.Data[variable.Name] = variable.Value.(string)
-			break
+		case model.REFERENCE:
+			cfgMap.Data[variable.Name] = variable.Value.(string)
 		}
 	}
 

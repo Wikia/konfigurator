@@ -206,10 +206,16 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 					LocalObjectReference: v1.LocalObjectReference{Name: secret.Name},
 				},
 			}
+		case REFERENCE:
+			envVarSource = &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					FieldPath: variable.Value.(string),
+				},
+			}
 		}
 
 		for _, envs := range dstContainer.Env {
-			if envs.Name == variable.Name {
+			if envs.Name == strings.ToUpper(variable.Name) {
 				envs.Value = ""
 				envs.ValueFrom = envVarSource
 				envVarSource = nil

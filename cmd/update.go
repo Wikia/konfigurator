@@ -20,8 +20,8 @@ import (
 	"github.com/Wikia/konfigurator/config"
 	"github.com/Wikia/konfigurator/helpers"
 	"github.com/Wikia/konfigurator/model"
-	"github.com/mohae/deepcopy"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/pkg/api"
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
@@ -81,7 +81,11 @@ to defined variables`,
 		}
 
 		// keeping old copy for diff
-		oldDeployment := deepcopy.Copy(deployment).(*v1beta1.Deployment)
+		oldDeployment, err := api.Scheme.Copy(deployment)
+
+		if err != nil {
+			return err
+		}
 
 		cfg := config.Get()
 		err = model.UpdateDeployment(deployment, configMap, secret, ContainerName, cfg.Definitions, Overwrite)
@@ -91,7 +95,7 @@ to defined variables`,
 		}
 
 		if !NoConfirm {
-			model.DiffDeploymets(oldDeployment, deployment)
+			model.DiffDeploymets(oldDeployment.(*v1beta1.Deployment), deployment)
 
 			confirm, err := helpers.AskConfirm("Apply changes?")
 

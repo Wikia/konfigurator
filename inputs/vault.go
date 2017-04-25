@@ -86,6 +86,10 @@ func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 		return nil, err
 	}
 
+	if secret == nil {
+		return nil, fmt.Errorf("VaultInput: could not find value: %s", variable.Value)
+	}
+
 	log.WithFields(log.Fields{
 		"variable": variable.Name,
 		"path":     variable.Value,

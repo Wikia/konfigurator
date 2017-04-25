@@ -5,7 +5,7 @@ matrix:
   - go: tip
   include:
   - go: tip
-    env: SEND_COVERAGE=0
+    env: SEND_COVERAGE=1
 before_install:
 - go get github.com/mattn/goveralls
 - go get github.com/modocache/gover

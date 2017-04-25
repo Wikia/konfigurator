@@ -1,4 +1,6 @@
-# konfigurator [![Build Status](https://travis-ci.org/Wikia/konfigurator.svg?branch=master)](https://travis-ci.org/Wikia/konfigurator)
+# konfigurator 
+[![Build Status](https://travis-ci.org/Wikia/konfigurator.svg?branch=master)](https://travis-ci.org/Wikia/konfigurator)
+[![Coverage Status](https://coveralls.io/repos/github/Wikia/konfigurator/badge.svg?branch=master)](https://coveralls.io/github/Wikia/konfigurator?branch=master)
 
 ## Sample configuration
 

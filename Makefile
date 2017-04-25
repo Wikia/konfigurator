@@ -72,7 +72,7 @@ prepare: $(GO_GLIDE)
 	$(GO_GLIDE) install
 
 install:
-	go install ${LDFLAGS} ./...
+	go install ${LDFLAGS}
 
 test-cover: vet $(GO_GINKGO)
 	@$(GO_GINKGO) -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --compilers=2

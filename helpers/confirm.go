@@ -1,35 +1,34 @@
 package helpers
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"strings"
 )
 
-func AskConfirm(prompt string) (bool, error) {
-	var response string
+func AskConfirm(w io.Writer, r io.Reader, prompt string) (bool, error) {
+	reader := bufio.NewReader(r)
 
 	for {
-		fmt.Print(prompt + " [Y/n]")
+		fmt.Fprint(w, prompt+" [Y/n]")
 
-		_, err := fmt.Scanln(&response)
+		response, err := reader.ReadString('\n')
 		if err != nil {
 			return false, err
 		}
 
-		okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
-		nayResponses := []string{"n", "N", "no", "No", "NO"}
+		response = strings.ToLower(strings.TrimSpace(response))
 
-		response = strings.Trim(response, " \n\r")
-		for _, yes := range okayResponses {
-			if yes == response {
-				return true, nil
-			}
+		// default action
+		if len(response) == 0 {
+			return true, nil
 		}
 
-		for _, nay := range nayResponses {
-			if nay == response {
-				return false, nil
-			}
+		if response == "yes" || response == "y" {
+			return true, nil
 		}
+
+		return false, nil
 	}
 }

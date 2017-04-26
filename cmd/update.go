@@ -17,6 +17,8 @@ package cmd
 import (
 	"fmt"
 
+	"os"
+
 	"github.com/Wikia/konfigurator/config"
 	"github.com/Wikia/konfigurator/helpers"
 	"github.com/Wikia/konfigurator/model"
@@ -97,7 +99,7 @@ to defined variables and saves it to a specified destination file`,
 		if !NoConfirm {
 			model.DiffDeploymets(oldDeployment.(*v1beta1.Deployment), deployment)
 
-			confirm, err := helpers.AskConfirm("Apply changes?")
+			confirm, err := helpers.AskConfirm(os.Stdout, os.Stdin, "Apply changes?")
 
 			if err != nil {
 				return err

@@ -196,4 +196,15 @@ var _ = Describe("Helpers", func() {
 		Expect(result).To(BeFalse())
 		Expect(outBuff.String()).To(Equal("Shall we proceed? [Y/n]"))
 	})
+
+	It("should return error when sending it incorrect input", func() {
+		sink := bufio.NewWriter(&outBuff)
+		inputs := bufio.NewReader(&inBuff)
+
+		result, err := AskConfirm(sink, inputs, "Shall we proceed?")
+		sink.Flush()
+
+		Expect(err).To(HaveOccurred())
+		Expect(result).To(BeFalse())
+	})
 })

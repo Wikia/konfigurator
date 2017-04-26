@@ -38,9 +38,9 @@ var (
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Updates configuration definition",
-	Long: `Will update configuration deinfition in the deployment file according
-to defined variables`,
+	Short: "Creates updated configuration definition file",
+	Long: `Updates configuration definition file according
+to defined variables and saves it to a specified destination file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(DeploymentFile) == 0 {
 			return fmt.Errorf("Missing deployment file")
@@ -123,11 +123,11 @@ to defined variables`,
 func init() {
 	RootCmd.AddCommand(updateCmd)
 
-	updateCmd.Flags().StringVarP(&DeploymentFile, "deployment", "f", "", "Deployment file where configuration should be updated")
+	updateCmd.Flags().StringVarP(&DeploymentFile, "deployment", "f", "", "Deployment file with configuration that should be updated")
 	updateCmd.Flags().StringVarP(&ContainerName, "containerName", "t", "", "Name of the container to modify in deployment")
 	updateCmd.Flags().StringVarP(&ConfigFile, "configMap", "m", "", "File where ConfigMap definitions are stored")
 	updateCmd.Flags().StringVarP(&SecretsFile, "secrets", "s", "", "File where Secrets are stored")
-	updateCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write deployment")
+	updateCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write updated deployment configuration")
 	updateCmd.Flags().BoolVarP(&NoConfirm, "yes", "y", false, "Answer all questions 'yes' - no confirmations and interaction")
 	updateCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
 }

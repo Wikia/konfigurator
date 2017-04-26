@@ -83,4 +83,5 @@ All variables will be injected as environment variables with names the same as v
   -h, --help                     help for update
   -w, --overwrite                Should configuration definitions be completely replaced by the new one or just appended
   -s, --secrets string           File where Secrets are stored
+  -y, --yes                      Answer all questions 'yes' - no confirmations and interaction
 ```

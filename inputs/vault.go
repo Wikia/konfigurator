@@ -21,7 +21,7 @@ type Vault struct {
 	client *api.Client
 }
 
-func (v *Vault) intiClient() error {
+func (v *Vault) initClient() error {
 	config := config.Get()
 
 	tr := &http.Transport{}
@@ -71,7 +71,7 @@ func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	}
 
 	if v.client == nil {
-		v.intiClient()
+		v.initClient()
 	}
 
 	source := strings.SplitN(variable.Value.(string), ":", 2)

@@ -36,7 +36,7 @@ var (
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download configuration and stores it locally",
+	Short: "Downloads configuration and stores it locally",
 	Long:  `Fetches configuration for configured sources and stores it locally`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		out := outputs.Get(OutputFmt)

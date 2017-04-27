@@ -41,6 +41,22 @@ Definitions:
     value: spec.nodeName
 ```
 
+## Global configuration flags
+```
+      --config string             config file (default is $HOME/.konfigurator.yaml)
+      --consulAddress string      Address to a Consul server (default "consul.service.consul")
+      --consulDatacenter string   Datacenter to be used in Consul
+      --consulTlsSkipVerify       Should TLS certificate be verified
+      --consulToken string        Token to be used when authenticating with Consul
+  -h, --help                      help for konfigurator
+      --kubeConf string           Path to a kubeconf config file
+      --logLevel string           What type of logs should be emited (available: panic, fatal, error, warning, info, debug) (default "info")
+      --vaultAddress string       Address to a Vault server
+      --vaultTlsSkipVerify        Should TLS certificate be verified
+      --vaultToken string         Token to be used when authenticating with Vault (overrides vaultTokenPath)
+      --vaultTokenPath string     Path to a file with Vault token (default "$HOME/.vault-token")
+```
+
 ## Available commands
 
 ### download
@@ -83,4 +99,5 @@ All variables will be injected as environment variables with names the same as v
   -h, --help                     help for update
   -w, --overwrite                Should configuration definitions be completely replaced by the new one or just appended
   -s, --secrets string           File where Secrets are stored
+  -y, --yes                      Answer all questions 'yes' - no confirmations and interaction
 ```

@@ -17,7 +17,7 @@ type Consul struct {
 	queryOpts *api.QueryOptions
 }
 
-func (c *Consul) intiClient() error {
+func (c *Consul) initClient() error {
 	config := config.Get()
 
 	tr := &http.Transport{}
@@ -55,7 +55,7 @@ func (c *Consul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	}
 
 	if c.client == nil {
-		c.intiClient()
+		c.initClient()
 	}
 
 	consulValue, qm, err := c.client.KV().Get(variable.Value.(string), c.queryOpts)

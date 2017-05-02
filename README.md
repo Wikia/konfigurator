@@ -94,8 +94,8 @@ All variables will be injected as environment variables with names the same as v
 ```
   -m, --configMap string         File where ConfigMap definitions are stored
   -t, --containerName string     Name of the container to modify in deployment
-  -f, --deployment string        Deployment file where configuration should be updated
-  -d, --destinationFile string   Destination file where to write deployment
+  -f, --deployment string        Deployment file with configuration that should be updated
+  -d, --destinationFile string   Destination file where to write updated deployment configuration
   -h, --help                     help for update
   -w, --overwrite                Should configuration definitions be completely replaced by the new one or just appended
   -s, --secrets string           File where Secrets are stored

@@ -25,12 +25,12 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/config"
+	"github.com/spf13/viper"
 )
 
 var (
 	OutputFmt       string
 	DestinationPath string
-	ServiceName     string
 )
 
 // downloadCmd represents the download command
@@ -45,18 +45,23 @@ var downloadCmd = &cobra.Command{
 			return fmt.Errorf("Unknown output format: %s", OutputFmt)
 		}
 
-		if len(ServiceName) == 0 {
+		cfg := config.Get()
+
+		if len(cfg.Application.Name) == 0 {
 			return fmt.Errorf("Missing service name")
 		}
 
-		cfg := config.Get()
-		variables, err := inputs.Process(cfg.Definitions)
+		if len(cfg.Application.Namespace) == 0 {
+			return fmt.Errorf("Missing namespace")
+		}
+
+		variables, err := inputs.Process(cfg.Application.Definitions)
 
 		if err != nil {
 			return fmt.Errorf("Error processing variables: %s", err)
 		}
 
-		err = out.Save(ServiceName, DestinationPath, variables)
+		err = out.Save(cfg.Application.Name, cfg.Application.Namespace, DestinationPath, variables)
 
 		if err != nil {
 			return fmt.Errorf("Error saving variables: %s", err)
@@ -78,5 +83,10 @@ func init() {
 	}
 	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
 	downloadCmd.Flags().StringVarP(&DestinationPath, "destinationFolder", "d", workingDir, "Where to store the output files")
-	downloadCmd.Flags().StringVarP(&ServiceName, "serviceName", "s", "", "What is the service name which settings will be downloaded as")
+
+	downloadCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
+	downloadCmd.PersistentFlags().String("name", "", "Name of the service to download variables for")
+
+	viper.BindPFlag("application.namespace", downloadCmd.PersistentFlags().Lookup("namespace"))
+	viper.BindPFlag("application.name", downloadCmd.PersistentFlags().Lookup("name"))
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Output interface {
-	Save(name string, destination string, vars []model.Variable) error
+	Save(name string, namespace string, destination string, vars []model.Variable) error
 }
 
 var registry map[string]Output

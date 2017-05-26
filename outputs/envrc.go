@@ -7,12 +7,16 @@ import (
 
 	"strings"
 
+	"regexp"
+
 	"github.com/Wikia/konfigurator/model"
 )
 
 type OutputEnvrc struct{}
 
-func (o *OutputEnvrc) Save(name string, destination string, vars []model.Variable) error {
+var escapeRegex = regexp.MustCompile(`([$\\_\x96])`)
+
+func (o *OutputEnvrc) Save(name string, namespace string, destination string, vars []model.Variable) error {
 	destinationPath, err := filepath.Abs(destination)
 
 	if err != nil {
@@ -31,7 +35,9 @@ func (o *OutputEnvrc) Save(name string, destination string, vars []model.Variabl
 			continue
 		}
 
-		_, err = cfgFile.WriteString(fmt.Sprintf("export %s=\"%s\"\n", strings.ToUpper(variable.Name), variable.Value))
+		value := escapeRegex.ReplaceAllString(variable.Value.(string), "\\$1")
+
+		_, err = cfgFile.WriteString(fmt.Sprintf("export %s=\"%s\"\n", strings.ToUpper(variable.Name), value))
 
 		if err != nil {
 			return err

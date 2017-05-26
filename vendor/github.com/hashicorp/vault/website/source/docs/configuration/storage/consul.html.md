@@ -69,7 +69,7 @@ at Consul's service discovery layer.
 - `disable_registration` `(bool: false)` – Specifies whether Vault should
   register itself with Consul.
 
-- `max_parallel` `(int: 128)` – Specifies the maximum number of concurrent
+- `max_parallel` `(string: "128")` – Specifies the maximum number of concurrent
   requests to Consul.
 
 - `path` `(string: "vault/")` – Specifies the path in Consul's key-value store
@@ -193,6 +193,6 @@ storage "consul" {
 ```
 
 [consul]: https://www.consul.io/ "Consul by HashiCorp"
-[consul-acl]: https://www.consul.io/docs/internals/acl.html "Consul ACLs"
-[consul-consistency]: https://www.consul.io/docs/agent/http.html#consistency-modes "Consul Consistency Modes"
+[consul-acl]: https://www.consul.io/docs/guides/acl.html "Consul ACLs"
+[consul-consistency]: https://www.consul.io/api/index.html#consistency-modes "Consul Consistency Modes"
 [consul-encryption]: https://www.consul.io/docs/agent/encryption.html "Consul Encryption"

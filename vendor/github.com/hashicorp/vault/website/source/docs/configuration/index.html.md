@@ -32,9 +32,6 @@ telemetry {
 After the configuration is written, use the `-config` flag with `vault server`
 to specify where the configuration is.
 
-Starting with 0.5.2, limited configuration options can be changed on-the-fly by
-sending a SIGHUP to the server process. These are denoted below.
-
 ## Parameters
 
 - `storage` <tt>([StorageBackend][storage-backend]: \<required\>)</tt> –
@@ -77,8 +74,8 @@ sending a SIGHUP to the server process. These are denoted below.
 
     Disabling `mlock` is not recommended unless the systems running Vault only
     use encrypted swap or do not use swap at all. Vault only supports memory
-    locking on UNIX-like systems (Linux, FreeBSD, Darwin, etc). Non-UNIX like
-    systems (e.g. Windows, NaCL, Android) lack the primitives to keep a
+    locking on UNIX-like systems that support the mlock() syscall (Linux, FreeBSD, etc).
+    Non UNIX-like systems (e.g. Windows, NaCL, Android) lack the primitives to keep a
     process's entire memory address space from spilling to disk and is therefore
     automatically disabled on unsupported platforms.
 
@@ -100,9 +97,10 @@ sending a SIGHUP to the server process. These are denoted below.
   duration for tokens and secrets. This is specified using a label
   suffix like `"30s"` or `"1h"`.
 
-- `ui` `(bool: false, Enterprise-only)` – Enables the built-in web UI. Once
-  enabled, the UI will be available to browsers at the standard Vault address.
-  This can also be provided via the environment variable `VAULT_UI`.
+- `ui` `(bool: false, Enterprise-only)` – Enables the built-in web UI, which is
+  available on all listeners (address + port) at the `/ui` path. Browsers accessing
+  the standard Vault API address will automatically redirect there. This can also
+  be provided via the environment variable `VAULT_UI`.
 
 [storage-backend]: /docs/configuration/storage/index.html
 [listener]: /docs/configuration/listener/index.html

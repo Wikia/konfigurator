@@ -84,6 +84,14 @@ including wildcard subdomains. See the documentation for
 more information.`,
 			},
 
+			"allow_glob_domains": &framework.FieldSchema{
+				Type:    framework.TypeBool,
+				Default: false,
+				Description: `If set, domains specified in "allowed_domains"
+can include glob patterns, e.g. "ftp*.example.com". See
+the documentation for more information.`,
+			},
+
 			"allow_any_name": &framework.FieldSchema{
 				Type:    framework.TypeBool,
 				Default: false,
@@ -203,6 +211,17 @@ disabled, invoking "pki/revoke" would be the only way to add the certificates
 to the CRL.  When large number of certificates are generated with long
 lifetimes, it is recommended that lease generation be disabled, as large amount of
 leases adversely affect the startup time of Vault.`,
+			},
+			"no_store": &framework.FieldSchema{
+				Type:    framework.TypeBool,
+				Default: false,
+				Description: `
+If set, certificates issued/signed against this role will not be stored in the
+in the storage backend. This can improve performance when issuing large numbers
+of certificates. However, certificates issued in this way cannot be enumerated
+or revoked, so this option is recommended only for certificates that are
+non-sensitive, or extremely short-lived. This option implies a value of "false"
+for "generate_lease".`,
 			},
 		},
 
@@ -369,6 +388,7 @@ func (b *backend) pathRoleCreate(
 		AllowedDomains:      data.Get("allowed_domains").(string),
 		AllowBareDomains:    data.Get("allow_bare_domains").(bool),
 		AllowSubdomains:     data.Get("allow_subdomains").(bool),
+		AllowGlobDomains:    data.Get("allow_glob_domains").(bool),
 		AllowAnyName:        data.Get("allow_any_name").(bool),
 		EnforceHostnames:    data.Get("enforce_hostnames").(bool),
 		AllowIPSANs:         data.Get("allow_ip_sans").(bool),
@@ -384,9 +404,15 @@ func (b *backend) pathRoleCreate(
 		OU:                  data.Get("ou").(string),
 		Organization:        data.Get("organization").(string),
 		GenerateLease:       new(bool),
+		NoStore:             data.Get("no_store").(bool),
 	}
 
-	*entry.GenerateLease = data.Get("generate_lease").(bool)
+	// no_store implies generate_lease := false
+	if entry.NoStore {
+		*entry.GenerateLease = false
+	} else {
+		*entry.GenerateLease = data.Get("generate_lease").(bool)
+	}
 
 	if entry.KeyType == "rsa" && entry.KeyBits < 2048 {
 		return logical.ErrorResponse("RSA keys < 2048 bits are unsafe and not supported"), nil
@@ -488,6 +514,7 @@ type roleEntry struct {
 	AllowBareDomains      bool   `json:"allow_bare_domains" structs:"allow_bare_domains" mapstructure:"allow_bare_domains"`
 	AllowTokenDisplayName bool   `json:"allow_token_displayname" structs:"allow_token_displayname" mapstructure:"allow_token_displayname"`
 	AllowSubdomains       bool   `json:"allow_subdomains" structs:"allow_subdomains" mapstructure:"allow_subdomains"`
+	AllowGlobDomains      bool   `json:"allow_glob_domains" structs:"allow_glob_domains" mapstructure:"allow_glob_domains"`
 	AllowAnyName          bool   `json:"allow_any_name" structs:"allow_any_name" mapstructure:"allow_any_name"`
 	EnforceHostnames      bool   `json:"enforce_hostnames" structs:"enforce_hostnames" mapstructure:"enforce_hostnames"`
 	AllowIPSANs           bool   `json:"allow_ip_sans" structs:"allow_ip_sans" mapstructure:"allow_ip_sans"`
@@ -504,6 +531,7 @@ type roleEntry struct {
 	OU                    string `json:"ou" structs:"ou" mapstructure:"ou"`
 	Organization          string `json:"organization" structs:"organization" mapstructure:"organization"`
 	GenerateLease         *bool  `json:"generate_lease,omitempty" structs:"generate_lease,omitempty"`
+	NoStore               bool   `json:"no_store" structs:"no_store" mapstructure:"no_store"`
 }
 
 const pathListRolesHelpSyn = `List the existing roles in this backend`

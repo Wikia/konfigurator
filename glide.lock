@@ -1,5 +1,5 @@
 hash: fe020ff17d759ff55a66840572423802f487ec8e22e7bdbc4585e0bf087483d7
-updated: 2017-04-25T23:29:49.453706498+02:00
+updated: 2017-05-26T14:07:10.43245578+02:00
 imports:
 - name: github.com/aryann/difflib
   version: a1a4dd44eb11820695fbe83e00fb2301ee6eb54c
@@ -18,7 +18,7 @@ imports:
   - log
   - swagger
 - name: github.com/fatih/structs
-  version: a720dfa8df582c51dee1b36feabb906bde1588bd
+  version: 74a29b9fac7397d933f47e33eba94d2d83a464a2
 - name: github.com/fsnotify/fsnotify
   version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/ghodss/yaml
@@ -41,7 +41,7 @@ imports:
 - name: github.com/google/gofuzz
   version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
 - name: github.com/hashicorp/consul
-  version: e9ca44d0a1757ac9aecc6785904a701936c10e4a
+  version: ea2a82b221c3e0a466a4f38ab4e8718ad8c60621
   subpackages:
   - api
 - name: github.com/hashicorp/errwrap
@@ -53,7 +53,7 @@ imports:
 - name: github.com/hashicorp/go-rootcerts
   version: 6bb64b370b90e7ef1fa532be9e591a81c3493e00
 - name: github.com/hashicorp/hcl
-  version: 7fa7fff964d035e8a162cce3a164b3ad02ad651b
+  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -64,11 +64,11 @@ imports:
   - json/scanner
   - json/token
 - name: github.com/hashicorp/serf
-  version: 65c2babe73c7a096cd24e9eeec67613eb4e436c9
+  version: dfab144618a063232d5753eaa4250a09865106c5
   subpackages:
   - coordinate
 - name: github.com/hashicorp/vault
-  version: 614deacfca3f3b7162bbf30a36d6fc7362cd47f0
+  version: d28dd5a018294562dbc9a18c95554d52b5d12390
   subpackages:
   - api
   - helper/compressutil
@@ -92,11 +92,11 @@ imports:
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure
-  version: cc8532a8e9a55ea36402aa21efdf403a60d34096
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-buffruneio
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
+  version: 048765b4491bcff26505dfbb8a7b920133a19fd2
 - name: github.com/PuerkitoBio/purell
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
@@ -112,11 +112,11 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 6ed17b5128e8932c9ecd4c3970e8ea5e60a418ac
+  version: ca57f0f5dba473a8a58765d16d7e811fb8027add
 - name: github.com/spf13/jwalterweatherman
-  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
+  version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
-  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
   version: 0967fc9aceab2ce9da34061253ac10fb99bba5b2
 - name: github.com/ugorji/go
@@ -133,7 +133,7 @@ imports:
   - idna
   - lex/httplex
 - name: golang.org/x/sys
-  version: 9f30dcbe5be197894515a338a9bda9253567ea8f
+  version: a55a76086885b80f79961eacb876ebd8caf3868d
   subpackages:
   - unix
 - name: golang.org/x/text

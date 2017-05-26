@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/armon/go-metrics"
+	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/consul/agent"
 	"github.com/hashicorp/consul/consul/structs"
 	"github.com/hashicorp/consul/types"
@@ -64,9 +65,6 @@ func (s *Server) monitorLeadership() {
 // leaderLoop runs as long as we are the leader to run various
 // maintenance activities
 func (s *Server) leaderLoop(stopCh chan struct{}) {
-	// Ensure we revoke leadership on stepdown
-	defer s.revokeLeadership()
-
 	// Fire a user event indicating a new leader
 	payload := []byte(s.config.NodeName)
 	if err := s.serfLAN.UserEvent(newLeaderEvent, payload, false); err != nil {
@@ -77,6 +75,19 @@ func (s *Server) leaderLoop(stopCh chan struct{}) {
 	// has succeeded
 	var reconcileCh chan serf.Member
 	establishedLeader := false
+
+	reassert := func() error {
+		if !establishedLeader {
+			return fmt.Errorf("leadership has not been established")
+		}
+		if err := s.revokeLeadership(); err != nil {
+			return err
+		}
+		if err := s.establishLeadership(); err != nil {
+			return err
+		}
+		return nil
+	}
 
 RECONCILE:
 	// Setup a reconciliation timer
@@ -95,11 +106,11 @@ RECONCILE:
 	// Check if we need to handle initial leadership actions
 	if !establishedLeader {
 		if err := s.establishLeadership(); err != nil {
-			s.logger.Printf("[ERR] consul: failed to establish leadership: %v",
-				err)
+			s.logger.Printf("[ERR] consul: failed to establish leadership: %v", err)
 			goto WAIT
 		}
 		establishedLeader = true
+		defer s.revokeLeadership()
 	}
 
 	// Reconcile any missing data
@@ -127,6 +138,8 @@ WAIT:
 			s.reconcileMember(member)
 		case index := <-s.tombstoneGC.ExpireCh():
 			go s.reapTombstones(index)
+		case errCh := <-s.reassertLeaderCh:
+			errCh <- reassert()
 		}
 	}
 }
@@ -310,7 +323,7 @@ func (s *Server) reconcile() (err error) {
 // a "reap" event to cause the node to be cleaned up.
 func (s *Server) reconcileReaped(known map[string]struct{}) error {
 	state := s.fsm.State()
-	_, checks, err := state.ChecksInState(nil, structs.HealthAny)
+	_, checks, err := state.ChecksInState(nil, api.HealthAny)
 	if err != nil {
 		return err
 	}
@@ -438,7 +451,7 @@ func (s *Server) handleAliveMember(member serf.Member) error {
 				return err
 			}
 			if services != nil {
-				for id, _ := range services.Services {
+				for id := range services.Services {
 					if id == service.ID {
 						match = true
 					}
@@ -455,7 +468,7 @@ func (s *Server) handleAliveMember(member serf.Member) error {
 			return err
 		}
 		for _, check := range checks {
-			if check.CheckID == SerfCheckID && check.Status == structs.HealthPassing {
+			if check.CheckID == SerfCheckID && check.Status == api.HealthPassing {
 				return nil
 			}
 		}
@@ -474,7 +487,7 @@ AFTER_CHECK:
 			Node:    member.Name,
 			CheckID: SerfCheckID,
 			Name:    SerfCheckName,
-			Status:  structs.HealthPassing,
+			Status:  api.HealthPassing,
 			Output:  SerfCheckAliveOutput,
 		},
 
@@ -502,7 +515,7 @@ func (s *Server) handleFailedMember(member serf.Member) error {
 			return err
 		}
 		for _, check := range checks {
-			if check.CheckID == SerfCheckID && check.Status == structs.HealthCritical {
+			if check.CheckID == SerfCheckID && check.Status == api.HealthCritical {
 				return nil
 			}
 		}
@@ -519,7 +532,7 @@ func (s *Server) handleFailedMember(member serf.Member) error {
 			Node:    member.Name,
 			CheckID: SerfCheckID,
 			Name:    SerfCheckName,
-			Status:  structs.HealthCritical,
+			Status:  api.HealthCritical,
 			Output:  SerfCheckFailedOutput,
 		},
 
@@ -626,19 +639,18 @@ func (s *Server) joinConsulServer(m serf.Member, parts *agent.Server) error {
 			// Exit with no-op if this is being called on an existing server
 			if server.Address == raft.ServerAddress(addr) && server.ID == raft.ServerID(parts.ID) {
 				return nil
-			} else {
-				future := s.raft.RemoveServer(server.ID, 0, 0)
-				if server.Address == raft.ServerAddress(addr) {
-					if err := future.Error(); err != nil {
-						return fmt.Errorf("error removing server with duplicate address %q: %s", server.Address, err)
-					}
-					s.logger.Printf("[INFO] consul: removed server with duplicate address: %s", server.Address)
-				} else {
-					if err := future.Error(); err != nil {
-						return fmt.Errorf("error removing server with duplicate ID %q: %s", server.ID, err)
-					}
-					s.logger.Printf("[INFO] consul: removed server with duplicate ID: %s", server.ID)
+			}
+			future := s.raft.RemoveServer(server.ID, 0, 0)
+			if server.Address == raft.ServerAddress(addr) {
+				if err := future.Error(); err != nil {
+					return fmt.Errorf("error removing server with duplicate address %q: %s", server.Address, err)
 				}
+				s.logger.Printf("[INFO] consul: removed server with duplicate address: %s", server.Address)
+			} else {
+				if err := future.Error(); err != nil {
+					return fmt.Errorf("error removing server with duplicate ID %q: %s", server.ID, err)
+				}
+				s.logger.Printf("[INFO] consul: removed server with duplicate ID: %s", server.ID)
 			}
 		}
 	}

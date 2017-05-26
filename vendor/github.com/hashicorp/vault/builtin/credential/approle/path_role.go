@@ -1895,7 +1895,7 @@ func (b *backend) handleRoleSecretIDCommon(req *logical.Request, data *framework
 	}
 
 	// Parse the CIDR blocks into a slice
-	secretIDCIDRs := strutil.ParseDedupAndSortStrings(cidrList, ",")
+	secretIDCIDRs := strutil.ParseDedupLowercaseAndSortStrings(cidrList, ",")
 
 	// Ensure that the CIDRs on the secret ID are a subset of that of role's
 	if err := verifyCIDRRoleSecretIDSubset(secretIDCIDRs, role.BoundCIDRList); err != nil {
@@ -1939,7 +1939,9 @@ func (b *backend) setRoleIDEntry(s logical.Storage, roleID string, roleIDEntry *
 	lock.Lock()
 	defer lock.Unlock()
 
+	b.saltMutex.RLock()
 	entryIndex := "role_id/" + b.salt.SaltID(roleID)
+	b.saltMutex.RUnlock()
 
 	entry, err := logical.StorageEntryJSON(entryIndex, roleIDEntry)
 	if err != nil {
@@ -1963,7 +1965,9 @@ func (b *backend) roleIDEntry(s logical.Storage, roleID string) (*roleIDStorageE
 
 	var result roleIDStorageEntry
 
+	b.saltMutex.RLock()
 	entryIndex := "role_id/" + b.salt.SaltID(roleID)
+	b.saltMutex.RUnlock()
 
 	if entry, err := s.Get(entryIndex); err != nil {
 		return nil, err
@@ -1987,7 +1991,9 @@ func (b *backend) roleIDEntryDelete(s logical.Storage, roleID string) error {
 	lock.Lock()
 	defer lock.Unlock()
 
+	b.saltMutex.RLock()
 	entryIndex := "role_id/" + b.salt.SaltID(roleID)
+	b.saltMutex.RUnlock()
 
 	return s.Delete(entryIndex)
 }
@@ -2086,7 +2092,7 @@ or the 'role/<role_name>/custom-secret-id' endpoints, and if those SecretIDs
 are used to perform the login operation, then the value of 'token-max-ttl'
 defines the maximum lifetime of the tokens issued, after which the tokens
 cannot be renewed. A reauthentication is required after this duration.
-This value will be croleed by the backend mount's maximum TTL value.`,
+This value will be capped by the backend mount's maximum TTL value.`,
 	},
 	"role-id": {
 		"Returns the 'role_id' of the role.",

@@ -59,10 +59,10 @@ rules:
 | [`event`](#event-rules)          | Listing and firing events in the [Event API](/api/event.html) |
 | [`key`](#key-value-rules)        | Key/value store operations in the [KV Store API](/api/kv.html) |
 | [`keyring`](#keyring-rules)      | Keyring operations in the [Keyring API](/api/operator/keyring.html) |
-| [`node`](#node-rules)            | Node-level catalog operations in the [Catalog API](/api/catalog.html), [Health API](/api/health.html), [Network Coordinate API](/api/coordinate.html), and [Agent API](/api/agent.html) |
+| [`node`](#node-rules)            | Node-level catalog operations in the [Catalog API](/api/catalog.html), [Health API](/api/health.html), [Prepared Query API](/api/query.html), [Network Coordinate API](/api/coordinate.html), and [Agent API](/api/agent.html) |
 | [`operator`](#operator-rules)    | Cluster-level operations in the [Operator API](/api/operator.html), other than the [Keyring API](/api/operator/keyring.html) |
 | [`query`](#prepared-query-rules) | Prepared query operations in the [Prepared Query API](/api/query.html)
-| [`service`](#service-rules)      | Service-level catalog operations in the [Catalog API](/api/catalog.html), [Health API](/api/health.html), and [Agent API](/api/agent.html) |
+| [`service`](#service-rules)      | Service-level catalog operations in the [Catalog API](/api/catalog.html), [Health API](/api/health.html), [Prepared Query API](/api/query.html), and [Agent API](/api/agent.html) |
 | [`session`](#session-rules)      | Session operations in the [Session API](/api/session.html) |
 
 Since Consul snapshots actually contain ACL tokens, the
@@ -109,7 +109,7 @@ marked as to whether they are set on servers, clients, or both.
 | -------------------- | ------- | ------- | ------- |
 | [`acl_datacenter`](/docs/agent/options.html#acl_datacenter) | `REQUIRED` | `REQUIRED` | Master control that enables ACLs by defining the authoritative Consul datacenter for ACLs |
 | [`acl_default_policy`](/docs/agent/options.html#acl_default_policy) | `OPTIONAL` | `N/A` | Determines whitelist or blacklist mode |
-| [`acl_down_policy`](/docs/agent/options.html#acl_down_policy) | `OPTIONAL` | `OPTIONAL` | Determines what to when the ACL datacenter is offline |
+| [`acl_down_policy`](/docs/agent/options.html#acl_down_policy) | `OPTIONAL` | `OPTIONAL` | Determines what to do when the ACL datacenter is offline |
 | [`acl_ttl`](/docs/agent/options.html#acl_ttl) | `OPTIONAL` | `OPTIONAL` | Determines time-to-live for cached ACLs |
 
 There are some additional configuration items related to [ACL replication](#replication) and
@@ -189,7 +189,7 @@ This is equivalent to the following JSON input:
     "foo/": {
       "policy": "write"
     },
-    "foo/private": {
+    "foo/private/": {
       "policy": "deny"
     }
   },
@@ -296,7 +296,7 @@ give agents a token with access to this event prefix, in addition to configuring
 
 #### Key/Value Rules
 
-The `key` policy controls access to key/value store operations in the [KV API](/api/kv.html]. Key
+The `key` policy controls access to key/value store operations in the [KV API](/api/kv.html). Key
 rules look like this:
 
 ```text
@@ -568,7 +568,7 @@ to use for registration events:
 
 #### Session Rules
 
-The `session` policy controls access to [Session API](/api/session.html)] operations.
+The `session` policy controls access to [Session API](/api/session.html) operations.
 
 Session rules look like this:
 
@@ -699,5 +699,5 @@ to the cluster), unless the [`acl_down_policy`](/docs/agent/options.html#acl_dow
 agent is set to "allow".
 
 Non-server agents do not need to have the
-[`acl_master_token`](/docs/agent/options.html#acl_agent_master_token) configured; it is not
+[`acl_master_token`](/docs/agent/options.html#acl_master_token) configured; it is not
 used by agents in any way.

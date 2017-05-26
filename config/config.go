@@ -21,7 +21,7 @@ type Config struct {
 	KubeConfPath string
 	Vault        VaultConfig
 	Consul       ConsulConfig
-	Definitions  []model.VariableDef
+	Application  model.Application
 }
 
 type VaultConfig struct {

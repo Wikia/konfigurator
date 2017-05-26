@@ -16,7 +16,7 @@ type OutputEnvrc struct{}
 
 var escapeRegex = regexp.MustCompile(`([$\\_\x96])`)
 
-func (o *OutputEnvrc) Save(name string, destination string, vars []model.Variable) error {
+func (o *OutputEnvrc) Save(name string, namespace string, destination string, vars []model.Variable) error {
 	destinationPath, err := filepath.Abs(destination)
 
 	if err != nil {

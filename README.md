@@ -13,32 +13,35 @@ Consul:
 Vault:
   Address: https://active.vault.service.poz-dev.consul:8200
   TlsSkipVerify: true
-Definitions:
-  # This value will be inserted directly into configuration
-  - name: Simple Variable
-    type: config
-    source: simple
-    value: some value
-  # This simple secret will be inserted into secrets as it is
-  - name: Simple Secret
-    type: secret
-    source: simple
-    value: abracadabra
-  # This value will be fetched from the configured Vault server under path "/sercret/app/temp" under key "test"
-  - name: SecretVault
-    type: secret
-    source: vault
-    value: /secret/app/temp:test
-  # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
-  - name: ConsulValue
-    type: config
-    source: consul
-    value: config/base/dev/DATACENTER
-  # This value refences internal k8s variables available inside POD
-  - name: ReferencedValue
-    type: reference
-    source: simple
-    value: spec.nodeName
+Application:
+  Name: my_app
+  Namespace: staging
+  Definitions:
+    # This value will be inserted directly into configuration
+    - name: Simple Variable
+      type: config
+      source: simple
+      value: some value
+    # This simple secret will be inserted into secrets as it is
+    - name: Simple Secret
+      type: secret
+      source: simple
+      value: abracadabra
+    # This value will be fetched from the configured Vault server under path "/sercret/app/temp" under key "test"
+    - name: SecretVault
+      type: secret
+      source: vault
+      value: /secret/app/temp:test
+    # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
+    - name: ConsulValue
+      type: config
+      source: consul
+      value: config/base/dev/DATACENTER
+    # This value refences internal k8s variables available inside POD
+    - name: ReferencedValue
+      type: reference
+      source: simple
+      value: spec.nodeName
 ```
 
 ## Global configuration flags
@@ -80,10 +83,11 @@ When outputing `envrc` values with type `reference` will be omitted.
 
 #### options
 ```
-  -d, --destinationFolder string   Where to store the output files (default "YOUR WORKING DIR")
+  -d, --destinationFolder string   Where to store the output files (default "/Users/harnas/_Projects_/_golang_/src/github.com/Wikia/konfigurator")
   -h, --help                       help for download
+      --name string                Name of the service to download variables for
+  -n, --namespace string           Kubernetes namespace for which files should be generated for (default "dev")
   -o, --output string              Output format (available formats: [envrc k8s-yaml]) (default "k8s-yaml")
-  -s, --serviceName string         What is the service name which settings will be downloaded as
 ```
 ### update
 This command will update k8s POD definition with the configured variables and secrets inserting references to proper ConfigMap and Secret.

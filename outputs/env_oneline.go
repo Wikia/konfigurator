@@ -5,18 +5,14 @@ import (
 
 	"strings"
 
-	"regexp"
-
 	"io"
 
 	"github.com/Wikia/konfigurator/model"
 )
 
-type OutputEnvrc struct{}
+type OutputOneline struct{}
 
-var escapeRegex = regexp.MustCompile(`([$\\_\x96])`)
-
-func (o *OutputEnvrc) Save(name string, namespace string, writer io.Writer, vars []model.Variable) error {
+func (o *OutputOneline) Save(name string, namespace string, writer io.Writer, vars []model.Variable) error {
 	for _, variable := range vars {
 		if variable.Type == model.REFERENCE {
 			continue
@@ -24,7 +20,7 @@ func (o *OutputEnvrc) Save(name string, namespace string, writer io.Writer, vars
 
 		value := escapeRegex.ReplaceAllString(variable.Value.(string), "\\$1")
 
-		_, err := fmt.Fprintf(writer, "export %s=\"%s\"\n", strings.ToUpper(variable.Name), value)
+		_, err := fmt.Fprintf(writer, "%s=\"%s\" ", strings.ToUpper(variable.Name), value)
 
 		if err != nil {
 			return err
@@ -35,5 +31,5 @@ func (o *OutputEnvrc) Save(name string, namespace string, writer io.Writer, vars
 }
 
 func init() {
-	Register("envrc", &OutputEnvrc{})
+	Register("envoneline", &OutputOneline{})
 }

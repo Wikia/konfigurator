@@ -19,6 +19,8 @@ import (
 
 	"os"
 
+	"bufio"
+
 	"github.com/Wikia/konfigurator/config"
 	"github.com/Wikia/konfigurator/helpers"
 	"github.com/Wikia/konfigurator/model"
@@ -110,7 +112,17 @@ to defined variables and saves it to a specified destination file`,
 			}
 		}
 
-		err = model.WriteDeployment(deployment, leftOver, DestinationFile)
+		destFile, err := os.Create(DestinationFile)
+		if err != nil {
+			return err
+		}
+
+		defer destFile.Close()
+
+		w := bufio.NewWriter(destFile)
+		defer w.Flush()
+
+		err = model.WriteDeployment(deployment, leftOver, w)
 
 		if err != nil {
 			return err

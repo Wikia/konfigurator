@@ -23,21 +23,19 @@ import (
 
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/config"
 	"github.com/spf13/viper"
 )
 
 var (
-	OutputFmt       string
-	DestinationPath string
+	OutputFmt string
 )
 
 // downloadCmd represents the download command
 var downloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Downloads configuration and stores it locally",
-	Long:  `Fetches configuration for configured sources and stores it locally`,
+	Short: "Downloads configuration and print out its contents",
+	Long:  `Fetches configuration for configured sources and outputs it on stdout`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		out := outputs.Get(OutputFmt)
 
@@ -61,7 +59,7 @@ var downloadCmd = &cobra.Command{
 			return fmt.Errorf("Error processing variables: %s", err)
 		}
 
-		err = out.Save(cfg.Application.Name, cfg.Application.Namespace, DestinationPath, variables)
+		err = out.Save(cfg.Application.Name, cfg.Application.Namespace, os.Stdout, variables)
 
 		if err != nil {
 			return fmt.Errorf("Error saving variables: %s", err)
@@ -75,14 +73,8 @@ var downloadCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(downloadCmd)
-	workingDir, err := os.Getwd()
 
-	if err != nil {
-		log.WithError(err).Error("Error getting working directory")
-		os.Exit(-6)
-	}
 	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
-	downloadCmd.Flags().StringVarP(&DestinationPath, "destinationFolder", "d", workingDir, "Where to store the output files")
 
 	downloadCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
 	downloadCmd.PersistentFlags().String("name", "", "Name of the service to download variables for")

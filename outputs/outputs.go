@@ -3,11 +3,13 @@ package outputs
 import (
 	"fmt"
 
+	"io"
+
 	"github.com/Wikia/konfigurator/model"
 )
 
 type Output interface {
-	Save(name string, namespace string, destination string, vars []model.Variable) error
+	Save(name string, namespace string, writer io.Writer, vars []model.Variable) error
 }
 
 var registry map[string]Output

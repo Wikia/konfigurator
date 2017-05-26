@@ -15,6 +15,8 @@ import (
 
 	"strings"
 
+	"io"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/helpers"
 	v1 "k8s.io/client-go/pkg/api/v1"
@@ -63,8 +65,8 @@ func ReadSecrets(filePath string) (*v1.Secret, [][]byte, error) {
 	return &secret, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteSecrets(secret *v1.Secret, leftOver [][]byte, filePath string) error {
-	return writeK8sYaml(secret, leftOver, filePath)
+func WriteSecrets(secret *v1.Secret, leftOver [][]byte, writer io.Writer) error {
+	return writeK8sYaml(secret, leftOver, writer)
 }
 
 func ReadConfigMap(filePath string) (*v1.ConfigMap, [][]byte, error) {
@@ -99,8 +101,8 @@ func ReadConfigMap(filePath string) (*v1.ConfigMap, [][]byte, error) {
 	return &configMap, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteConfigMap(configMap *v1.ConfigMap, leftOver [][]byte, filePath string) error {
-	return writeK8sYaml(configMap, leftOver, filePath)
+func WriteConfigMap(configMap *v1.ConfigMap, leftOver [][]byte, writer io.Writer) error {
+	return writeK8sYaml(configMap, leftOver, writer)
 }
 
 func ReadDeployment(filePath string) (*v1beta1.Deployment, [][]byte, error) {
@@ -135,8 +137,8 @@ func ReadDeployment(filePath string) (*v1beta1.Deployment, [][]byte, error) {
 	return &deployment, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteDeployment(deployment *v1beta1.Deployment, leftOver [][]byte, filePath string) error {
-	return writeK8sYaml(deployment, leftOver, filePath)
+func WriteDeployment(deployment *v1beta1.Deployment, leftOver [][]byte, writer io.Writer) error {
+	return writeK8sYaml(deployment, leftOver, writer)
 }
 
 func marshalK8sEntity(obj interface{}) ([]byte, error) {
@@ -156,14 +158,7 @@ func marshalK8sEntity(obj interface{}) ([]byte, error) {
 	return output, nil
 }
 
-func writeK8sYaml(obj interface{}, leftOver [][]byte, filePath string) error {
-	secretFile, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-
-	defer secretFile.Close()
-
+func writeK8sYaml(obj interface{}, leftOver [][]byte, writer io.Writer) error {
 	output, err := marshalK8sEntity(obj)
 
 	if err != nil {
@@ -172,7 +167,7 @@ func writeK8sYaml(obj interface{}, leftOver [][]byte, filePath string) error {
 
 	leftOver = append(leftOver, output)
 
-	_, err = secretFile.Write(bytes.Join(leftOver, yamlDocumentSeparator))
+	_, err = writer.Write(bytes.Join(leftOver, yamlDocumentSeparator))
 
 	if err != nil {
 		return err

@@ -2,7 +2,8 @@ package outputs
 
 import (
 	"fmt"
-	"path/filepath"
+
+	"io"
 
 	"github.com/Wikia/konfigurator/model"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,13 +12,7 @@ import (
 
 type OutputK8SYaml struct{}
 
-func (o *OutputK8SYaml) Save(name string, namespace string, destination string, vars []model.Variable) error {
-	destinationPath, err := filepath.Abs(destination)
-
-	if err != nil {
-		return err
-	}
-
+func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, vars []model.Variable) error {
 	cfgMap := v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -53,13 +48,15 @@ func (o *OutputK8SYaml) Save(name string, namespace string, destination string, 
 		}
 	}
 
-	err = model.WriteConfigMap(&cfgMap, [][]byte{}, filepath.Join(destinationPath, fmt.Sprintf("%s_configMap.yaml", name)))
+	err := model.WriteConfigMap(&cfgMap, [][]byte{}, writer)
 
 	if err != nil {
 		return err
 	}
 
-	err = model.WriteSecrets(&secrets, [][]byte{}, filepath.Join(destinationPath, fmt.Sprintf("%s_secrets.yaml", name)))
+	fmt.Fprintln(writer, "---")
+
+	err = model.WriteSecrets(&secrets, [][]byte{}, writer)
 
 	if err != nil {
 		return err

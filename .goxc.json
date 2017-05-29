@@ -31,13 +31,13 @@
   ],
   "BuildConstraints": "linux,amd64 darwin,amd64 windows,amd64",
   "BuildSettings": {
-    "LdFlags": "-s",
+    "LdFlags": "-s -w -linkmode external -extldflags \"-static\"",
     "LdFlagsXVars": {
       "TimeNow": "github.com/Wikia/konfigurator/main.BuildTime",
       "Version": "github.com/Wikia/konfigurator/main.Version"
     },
     "Tags": "important",
-    "ExtraArgs": ["-a", "-installsuffix cgo"]
+    "ExtraArgs": ["-a"]
   },
   "PackageVersion": "0.2.3",
   "ConfigVersion": "0.9"

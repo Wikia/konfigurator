@@ -39,6 +39,6 @@
     "Tags": "important",
     "ExtraArgs": ["-a", "-installsuffix cgo"]
   },
-  "PackageVersion": "0.2.2",
+  "PackageVersion": "0.2.3",
   "ConfigVersion": "0.9"
 }

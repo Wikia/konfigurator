@@ -31,14 +31,14 @@
   ],
   "BuildConstraints": "linux,amd64 darwin,amd64 windows,amd64",
   "BuildSettings": {
-    "LdFlags": "-s",
+    "LdFlags": "",
     "LdFlagsXVars": {
       "TimeNow": "github.com/Wikia/konfigurator/main.BuildTime",
       "Version": "github.com/Wikia/konfigurator/main.Version"
     },
     "Tags": "important",
-    "ExtraArgs": ["-a"]
+    "ExtraArgs": ["-a", "-installsuffix", "cgo"]
   },
-  "PackageVersion": "0.2.1",
+  "PackageVersion": "0.2.5",
   "ConfigVersion": "0.9"
 }

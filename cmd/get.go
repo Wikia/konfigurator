@@ -31,10 +31,10 @@ var (
 	OutputFmt string
 )
 
-// downloadCmd represents the download command
-var downloadCmd = &cobra.Command{
-	Use:   "download",
-	Short: "Downloads configuration and print out its contents",
+// getCmd represents the get command
+var getCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Gets configuration and print out its contents",
 	Long:  `Fetches configuration for configured sources and outputs it on stdout`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		out := outputs.Get(OutputFmt)
@@ -76,13 +76,13 @@ var downloadCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(downloadCmd)
+	RootCmd.AddCommand(getCmd)
 
-	downloadCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
+	getCmd.Flags().StringVarP(&OutputFmt, "output", "o", "k8s-yaml", fmt.Sprintf("Output format (available formats: %v)", outputs.GetRegisteredNames()))
 
-	downloadCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
-	downloadCmd.PersistentFlags().String("name", "", "Name of the service to download variables for")
+	getCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
+	getCmd.PersistentFlags().String("name", "", "Name of the service to download variables for")
 
-	viper.BindPFlag("application.namespace", downloadCmd.PersistentFlags().Lookup("namespace"))
-	viper.BindPFlag("application.name", downloadCmd.PersistentFlags().Lookup("name"))
+	viper.BindPFlag("application.namespace", getCmd.PersistentFlags().Lookup("namespace"))
+	viper.BindPFlag("application.name", getCmd.PersistentFlags().Lookup("name"))
 }

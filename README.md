@@ -47,7 +47,7 @@ Application:
 
 ## Available commands
 
-### download
+### get
 This command will fetch all the variables from the defined sources and put them in proper file(s).
  
 #### Available types:
@@ -64,7 +64,7 @@ This command will fetch all the variables from the defined sources and put them 
 * **k8s-yaml** - will save configuration into Secret and ConfigMap YAMLs for use with kubectl
 * **envrc** - will save all configuration into shell compatible file for use in local development or testing
 
-When outputing `envrc` values with type `reference` will be omitted.
+When outpacing `envrc` values with type `reference` will be omitted.
 
 #### options
 ```
@@ -74,7 +74,7 @@ When outputing `envrc` values with type `reference` will be omitted.
   -n, --namespace string           Kubernetes namespace for which files should be generated for (default "dev")
   -o, --output string              Output format (available formats: [envrc k8s-yaml]) (default "k8s-yaml")
 ```
-### update
+### set
 This command will update k8s POD definition with the configured variables and secrets inserting references to proper ConfigMap and Secret.
 All variables will be injected as environment variables with names the same as variable name.
 

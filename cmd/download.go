@@ -53,7 +53,11 @@ var downloadCmd = &cobra.Command{
 			return fmt.Errorf("Missing namespace")
 		}
 
-		variables, err := inputs.Process(cfg.Application.Definitions)
+		varDefinitions, err := config.ParseVariableDefinitions(cfg.Application.Definitions)
+		if err != nil {
+			return err
+		}
+		variables, err := inputs.Process(varDefinitions)
 
 		if err != nil {
 			return fmt.Errorf("Error processing variables: %s", err)

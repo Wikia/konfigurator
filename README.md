@@ -17,31 +17,16 @@ Application:
   Name: my_app
   Namespace: staging
   Definitions:
-    # This value will be inserted directly into configuration
-    - name: Simple Variable
-      type: config
-      source: simple
-      value: some value
+    # This value will be inserted directly into configuration (config map destination is default for simple type)
+    simple_var: simple(some value)
     # This simple secret will be inserted into secrets as it is
-    - name: Simple Secret
-      type: secret
-      source: simple
-      value: abracadabra
-    # This value will be fetched from the configured Vault server under path "/sercret/app/temp" under key "test"
-    - name: SecretVault
-      type: secret
-      source: vault
-      value: /secret/app/temp:test
+    simple_secret: simple(abracadabra)->secret
+    # This value will be fetched from the configured Vault server under path "/secret/app/temp" under key "test" (secret is also default for vault type)
+    vault_secret: vault(/secret/app/temp:test)
     # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
-    - name: ConsulValue
-      type: config
-      source: consul
-      value: config/base/dev/DATACENTER
-    # This value refences internal k8s variables available inside POD
-    - name: ReferencedValue
-      type: reference
-      source: simple
-      value: spec.nodeName
+    consul_var: consul(config/base/dev/DATACENTER)
+    # This value references internal k8s variables available inside POD
+    reference_var: simple(spec.nodeName)->reference
 ```
 
 ## Global configuration flags

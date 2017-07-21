@@ -92,7 +92,12 @@ to defined variables and saves it to a specified destination file`,
 		}
 
 		cfg := config.Get()
-		err = model.UpdateDeployment(deployment, configMap, secret, ContainerName, cfg.Application.Definitions, Overwrite)
+		varDefinitions, err := config.ParseVariableDefinitions(cfg.Application.Definitions)
+		if err != nil {
+			return err
+		}
+
+		err = model.UpdateDeployment(deployment, configMap, secret, ContainerName, varDefinitions, Overwrite)
 
 		if err != nil {
 			return fmt.Errorf("Error updating deployment: %s", err)

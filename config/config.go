@@ -41,7 +41,7 @@ type ConsulConfig struct {
 }
 
 var currentConfig *Config
-var variableRegex = regexp.MustCompile(`^(?P<type>\w+)\((?P<value>[^)]+)\)(?:\s*->\s*(?P<destination>\w+))?$`)
+var variableRegex = regexp.MustCompile(`^(?P<type>\w+)\((?P<value>[^)]+)?\)(?:\s*->\s*(?P<destination>\w+))?$`)
 
 func Setup(cmd *cobra.Command) error {
 	levels := make([]string, len(log.AllLevels))

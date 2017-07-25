@@ -10,6 +10,8 @@ ifeq ($(OS),Windows_NT)
 else
 	GO_PATH := ${GOPATH}
 endif
+# Remove the trailing slash
+GO_PATH := $(patsubst %/,%,$(GO_PATH))
 
 # GO_PATH := $(realpath $(GO_PATH))
 ifeq ($(OS),Windows_NT)

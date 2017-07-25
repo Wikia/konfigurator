@@ -13,32 +13,51 @@ Consul:
 Vault:
   Address: https://active.vault.service.poz-dev.consul:8200
   TlsSkipVerify: true
-Definitions:
-  # This value will be inserted directly into configuration
-  - name: Simple Variable
-    type: config
-    source: simple
-    value: some value
-  # This simple secret will be inserted into secrets as it is
-  - name: Simple Secret
-    type: secret
-    source: simple
-    value: abracadabra
-  # This value will be fetched from the configured Vault server under path "/sercret/app/temp" under key "test"
-  - name: SecretVault
-    type: secret
-    source: vault
-    value: /secret/app/temp:test
-  # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
-  - name: ConsulValue
-    type: config
-    source: consul
-    value: config/base/dev/DATACENTER
-  # This value refences internal k8s variables available inside POD
-  - name: ReferencedValue
-    type: reference
-    source: simple
-    value: spec.nodeName
+Application:
+  Name: my_app
+  Namespace: staging
+  Definitions:
+    # This value will be inserted directly into configuration
+    - name: Simple Variable
+      type: config
+      source: simple
+      value: some value
+    # This simple secret will be inserted into secrets as it is
+    - name: Simple Secret
+      type: secret
+      source: simple
+      value: abracadabra
+    # This value will be fetched from the configured Vault server under path "/sercret/app/temp" under key "test"
+    - name: SecretVault
+      type: secret
+      source: vault
+      value: /secret/app/temp:test
+    # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
+    - name: ConsulValue
+      type: config
+      source: consul
+      value: config/base/dev/DATACENTER
+    # This value refences internal k8s variables available inside POD
+    - name: ReferencedValue
+      type: reference
+      source: simple
+      value: spec.nodeName
+```
+
+## Global configuration flags
+```
+      --config string             config file (default is $HOME/.konfigurator.yaml)
+      --consulAddress string      Address to a Consul server (default "consul.service.consul")
+      --consulDatacenter string   Datacenter to be used in Consul
+      --consulTlsSkipVerify       Should TLS certificate be verified
+      --consulToken string        Token to be used when authenticating with Consul
+  -h, --help                      help for konfigurator
+      --kubeConf string           Path to a kubeconf config file
+      --logLevel string           What type of logs should be emited (available: panic, fatal, error, warning, info, debug) (default "info")
+      --vaultAddress string       Address to a Vault server
+      --vaultTlsSkipVerify        Should TLS certificate be verified
+      --vaultToken string         Token to be used when authenticating with Vault (overrides vaultTokenPath)
+      --vaultTokenPath string     Path to a file with Vault token (default "$HOME/.vault-token")
 ```
 
 ## Available commands
@@ -64,10 +83,11 @@ When outputing `envrc` values with type `reference` will be omitted.
 
 #### options
 ```
-  -d, --destinationFolder string   Where to store the output files (default "YOUR WORKING DIR")
+  -d, --destinationFolder string   Where to store the output files (default "/Users/harnas/_Projects_/_golang_/src/github.com/Wikia/konfigurator")
   -h, --help                       help for download
+      --name string                Name of the service to download variables for
+  -n, --namespace string           Kubernetes namespace for which files should be generated for (default "dev")
   -o, --output string              Output format (available formats: [envrc k8s-yaml]) (default "k8s-yaml")
-  -s, --serviceName string         What is the service name which settings will be downloaded as
 ```
 ### update
 This command will update k8s POD definition with the configured variables and secrets inserting references to proper ConfigMap and Secret.
@@ -78,9 +98,10 @@ All variables will be injected as environment variables with names the same as v
 ```
   -m, --configMap string         File where ConfigMap definitions are stored
   -t, --containerName string     Name of the container to modify in deployment
-  -f, --deployment string        Deployment file where configuration should be updated
-  -d, --destinationFile string   Destination file where to write deployment
+  -f, --deployment string        Deployment file with configuration that should be updated
+  -d, --destinationFile string   Destination file where to write updated deployment configuration
   -h, --help                     help for update
   -w, --overwrite                Should configuration definitions be completely replaced by the new one or just appended
   -s, --secrets string           File where Secrets are stored
+  -y, --yes                      Answer all questions 'yes' - no confirmations and interaction
 ```

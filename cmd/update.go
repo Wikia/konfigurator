@@ -17,9 +17,14 @@ package cmd
 import (
 	"fmt"
 
+	"os"
+
 	"github.com/Wikia/konfigurator/config"
+	"github.com/Wikia/konfigurator/helpers"
 	"github.com/Wikia/konfigurator/model"
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/pkg/api"
+	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 var (
@@ -29,14 +34,15 @@ var (
 	SecretsFile     string
 	ContainerName   string
 	DestinationFile string
+	NoConfirm       bool
 )
 
 // updateCmd represents the update command
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Updates configuration definition",
-	Long: `Will update configuration deinfition in the deployment file according
-to defined variables`,
+	Short: "Creates updated configuration definition file",
+	Long: `Updates configuration definition file according
+to defined variables and saves it to a specified destination file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(DeploymentFile) == 0 {
 			return fmt.Errorf("Missing deployment file")
@@ -76,12 +82,32 @@ to defined variables`,
 			return err
 		}
 
-		cfg := config.Get()
+		// keeping old copy for diff
+		oldDeployment, err := api.Scheme.Copy(deployment)
 
-		err = model.UpdateDeployment(deployment, configMap, secret, ContainerName, cfg.Definitions, Overwrite)
+		if err != nil {
+			return err
+		}
+
+		cfg := config.Get()
+		err = model.UpdateDeployment(deployment, configMap, secret, ContainerName, cfg.Application.Definitions, Overwrite)
 
 		if err != nil {
 			return fmt.Errorf("Error updating deployment: %s", err)
+		}
+
+		if !NoConfirm {
+			model.DiffDeploymets(oldDeployment.(*v1beta1.Deployment), deployment)
+
+			confirm, err := helpers.AskConfirm(os.Stdout, os.Stdin, "Apply changes?")
+
+			if err != nil {
+				return err
+			}
+
+			if !confirm {
+				return nil
+			}
 		}
 
 		err = model.WriteDeployment(deployment, leftOver, DestinationFile)
@@ -99,10 +125,11 @@ to defined variables`,
 func init() {
 	RootCmd.AddCommand(updateCmd)
 
-	updateCmd.Flags().StringVarP(&DeploymentFile, "deployment", "f", "", "Deployment file where configuration should be updated")
+	updateCmd.Flags().StringVarP(&DeploymentFile, "deployment", "f", "", "Deployment file with configuration that should be updated")
 	updateCmd.Flags().StringVarP(&ContainerName, "containerName", "t", "", "Name of the container to modify in deployment")
 	updateCmd.Flags().StringVarP(&ConfigFile, "configMap", "m", "", "File where ConfigMap definitions are stored")
 	updateCmd.Flags().StringVarP(&SecretsFile, "secrets", "s", "", "File where Secrets are stored")
-	updateCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write deployment")
+	updateCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write updated deployment configuration")
+	updateCmd.Flags().BoolVarP(&NoConfirm, "yes", "y", false, "Answer all questions 'yes' - no confirmations and interaction")
 	updateCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
 }

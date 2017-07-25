@@ -11,7 +11,7 @@ import (
 
 type OutputK8SYaml struct{}
 
-func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Variable) error {
+func (o *OutputK8SYaml) Save(name string, namespace string, destination string, vars []model.Variable) error {
 	destinationPath, err := filepath.Abs(destination)
 
 	if err != nil {
@@ -25,7 +25,7 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: "dev",
+			Namespace: namespace,
 		},
 		Data: map[string]string{},
 	}
@@ -36,7 +36,7 @@ func (o *OutputK8SYaml) Save(name string, destination string, vars []model.Varia
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: "dev",
+			Namespace: namespace,
 		},
 		Data: map[string][]byte{},
 		Type: v1.SecretTypeOpaque,

@@ -1,6 +1,8 @@
-hash: cf244c04794f6a12db7401556c693e8ede7f6a17acd27aaa7c7444d75d623b9d
-updated: 2017-04-24T23:52:57.484347758+02:00
+hash: fe020ff17d759ff55a66840572423802f487ec8e22e7bdbc4585e0bf087483d7
+updated: 2017-04-25T23:29:49.453706498+02:00
 imports:
+- name: github.com/aryann/difflib
+  version: a1a4dd44eb11820695fbe83e00fb2301ee6eb54c
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
@@ -81,6 +83,12 @@ imports:
   - buffer
   - jlexer
   - jwriter
+- name: github.com/mattn/go-colorable
+  version: ded68f7a9561c023e790de24279db7ebf473ea80
+- name: github.com/mattn/go-isatty
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: github.com/mgutz/ansi
+  version: 9520e82c474b0a04dd04f8a40959027271bab992
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure
@@ -104,7 +112,7 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: f4f10f6873175e78bb1503da7e78c260a7f3ef63
+  version: 6ed17b5128e8932c9ecd4c3970e8ea5e60a418ac
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
@@ -118,12 +126,14 @@ imports:
 - name: golang.org/x/net
   version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
   subpackages:
+  - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
   - lex/httplex
 - name: golang.org/x/sys
-  version: ea9bcade75cb975a0b9738936568ab388b845617
+  version: 9f30dcbe5be197894515a338a9bda9253567ea8f
   subpackages:
   - unix
 - name: golang.org/x/text

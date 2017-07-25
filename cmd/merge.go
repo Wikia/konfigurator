@@ -20,17 +20,20 @@ import (
 	"bufio"
 	"os"
 
+	"path"
+
+	"path/filepath"
+
 	"github.com/Wikia/konfigurator/config"
-	"github.com/Wikia/konfigurator/helpers"
 	"github.com/Wikia/konfigurator/inputs"
 	"github.com/Wikia/konfigurator/model"
+	"github.com/Wikia/konfigurator/outputs"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/pkg/api"
-	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 var (
-	SecretName string
+	SecretName     string
+	DestinationDir string
 )
 
 // mergeCmd represents the update command
@@ -48,6 +51,16 @@ var mergeCmd = &cobra.Command{
 
 		if len(cfg.Application.Namespace) == 0 {
 			return fmt.Errorf("Missing namespace")
+		}
+
+		if len(DestinationDir) == 0 {
+			return fmt.Errorf("Missing destination dir")
+		}
+
+		DestinationDir, err := filepath.Abs(DestinationDir)
+
+		if err != nil {
+			return err
 		}
 
 		varDefinitions, err := config.ParseVariableDefinitions(cfg.Application.Definitions)
@@ -70,40 +83,48 @@ var mergeCmd = &cobra.Command{
 			SecretName = ContainerName
 		}
 
-		// keeping old copy for diff
-		oldDeployment, err := api.Scheme.Copy(deployment)
-
 		err = model.UpdateDeploymentInPlace(deployment, variables, SecretName, ContainerName, Overwrite)
 
 		if err != nil {
 			return fmt.Errorf("Error updating deployment: %s", err)
 		}
 
-		if !NoConfirm {
-			model.DiffDeploymets(oldDeployment.(*v1beta1.Deployment), deployment)
+		destDeploymentPath := path.Join(DestinationDir, fmt.Sprintf("%s_deployment.yaml", ContainerName))
 
-			confirm, err := helpers.AskConfirm(os.Stdout, os.Stdin, "Apply changes?")
-
-			if err != nil {
-				return err
-			}
-
-			if !confirm {
-				return nil
-			}
-		}
-
-		destFile, err := os.Create(DestinationFile)
+		destDeploymentFile, err := os.Create(destDeploymentPath)
 		if err != nil {
 			return err
 		}
 
-		defer destFile.Close()
+		defer destDeploymentFile.Close()
 
-		w := bufio.NewWriter(destFile)
-		defer w.Flush()
+		wDeploy := bufio.NewWriter(destDeploymentFile)
+		defer wDeploy.Flush()
 
-		err = model.WriteDeployment(deployment, leftOver, w)
+		err = model.WriteDeployment(deployment, leftOver, wDeploy)
+
+		if err != nil {
+			return err
+		}
+
+		destSecretsPath := path.Join(DestinationDir, fmt.Sprintf("%s_configs.yaml", ContainerName))
+
+		destSecretsFile, err := os.Create(destSecretsPath)
+		if err != nil {
+			return err
+		}
+
+		defer destSecretsFile.Close()
+
+		wSecrets := bufio.NewWriter(destSecretsFile)
+		defer wSecrets.Flush()
+
+		out := outputs.Get("k8s-yaml")
+		if out == nil {
+			return fmt.Errorf("Could not get output plugin for k8s")
+		}
+
+		err = out.Save(SecretName, cfg.Application.Namespace, wSecrets, variables)
 
 		if err != nil {
 			return err
@@ -122,7 +143,6 @@ func init() {
 	mergeCmd.Flags().StringVarP(&ContainerName, "containerName", "t", "", "Name of the container to modify in deployment")
 	mergeCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
 	mergeCmd.Flags().StringVarP(&SecretName, "secretName", "s", "", "Name of the secret to use in the deployment mappings (defaults to 'containerName')")
-	mergeCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write updated deployment configuration")
-	mergeCmd.Flags().BoolVarP(&NoConfirm, "yes", "y", false, "Answer all questions 'yes' - no confirmations and interaction")
+	mergeCmd.Flags().StringVarP(&DestinationDir, "destinationDir", "d", ".", "Destination where to write resulting filesn")
 	mergeCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
 }

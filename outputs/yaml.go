@@ -48,18 +48,23 @@ func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, va
 		}
 	}
 
-	err := model.WriteConfigMap(&cfgMap, [][]byte{}, writer)
+	if len(cfgMap.Data) > 0 {
 
-	if err != nil {
-		return err
+		err := model.WriteConfigMap(&cfgMap, [][]byte{}, writer)
+
+		if err != nil {
+			return err
+		}
 	}
 
-	fmt.Fprintln(writer, "---")
+	if len(secrets.Data) > 0 {
+		fmt.Fprintln(writer, "---")
 
-	err = model.WriteSecrets(&secrets, [][]byte{}, writer)
+		err := model.WriteSecrets(&secrets, [][]byte{}, writer)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

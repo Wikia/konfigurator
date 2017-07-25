@@ -67,7 +67,7 @@ This command will fetch all the variables from the defined sources and output th
 * **k8s-yaml** - will save configuration into Secret and ConfigMap YAMLs for use with kubectl
 * **envrc** - will save all configuration into shell compatible file for use in local development or testing
 
-When outpacing `envrc` values with type `reference` will be omitted.
+When outputting in `envrc` format, values with type `reference` will be omitted.
 
 #### options
 ```

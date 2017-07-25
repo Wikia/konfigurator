@@ -34,8 +34,8 @@ var (
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "Gets configuration and print out its contents",
-	Long:  `Fetches configuration for configured sources and outputs it on stdout`,
+	Short: "Gets configuration and prints out its contents",
+	Long:  `Fetches configuration for configured sources and prints out it on stdout`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		out := outputs.Get(OutputFmt)
 

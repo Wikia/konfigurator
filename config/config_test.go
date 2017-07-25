@@ -42,6 +42,42 @@ var _ = Describe("Config", func() {
 		})
 	})
 
+	Context("with invalid variable source", func() {
+		conf := map[string]string{
+			"foo": "vaulter(key1)",
+		}
+
+		It("should throw error", func() {
+			_, err := ParseVariableDefinitions(conf)
+
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Context("with invalid variable destination", func() {
+		conf := map[string]string{
+			"foo": "vault(key1)->secrets",
+		}
+
+		It("should throw error", func() {
+			_, err := ParseVariableDefinitions(conf)
+
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Context("with invalid layered consul value", func() {
+		conf := map[string]string{
+			"foo": "layered_consul(key1#ssss)->secrets",
+		}
+
+		It("should throw error", func() {
+			_, err := ParseVariableDefinitions(conf)
+
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
 	Context("with sample configuration", func() {
 		conf := `
 LogLevel: debug
@@ -70,7 +106,8 @@ Application:
 			Expect(err).NotTo(HaveOccurred())
 			Expect(viper.GetString("vault.tokenpath")).NotTo(BeEmpty())
 
-			config := Config{}
+			config := Get()
+			Expect(config).NotTo(BeNil())
 			err = viper.Unmarshal(&config)
 			Expect(err).NotTo(HaveOccurred())
 

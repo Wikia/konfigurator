@@ -51,7 +51,7 @@ Application:
 ## Available commands
 
 ### get
-This command will fetch all the variables from the defined sources and put them in proper file(s).
+This command will fetch all the variables from the defined sources and output them on STDOUT as multi document YAML file.
  
 #### Available types:
 * **config** - values will be put into ConfigMaps

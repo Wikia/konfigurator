@@ -74,6 +74,7 @@ When outpacing `envrc` values with type `reference` will be omitted.
   -n, --namespace string           Kubernetes namespace for which files should be generated for (default "dev")
   -o, --output string              Output format (available formats: [envrc k8s-yaml]) (default "k8s-yaml")
 ```
+
 ### set
 This command will update k8s POD definition with the configured variables and secrets inserting references to proper ConfigMap and Secret.
 All variables will be injected as environment variables with names the same as variable name.
@@ -89,4 +90,20 @@ All variables will be injected as environment variables with names the same as v
   -w, --overwrite                Should configuration definitions be completely replaced by the new one or just appended
   -s, --secrets string           File where Secrets are stored
   -y, --yes                      Answer all questions 'yes' - no confirmations and interaction
+```
+
+### merge
+This command will take deployment file and insert in-line values for config (non-secrets) as env variables and reference
+any secrets specified in the configuration. It will put in specified folder resulting files (updated deployment and secrets file).
+
+#### options
+
+```
+  -t, --containerName string    Name of the container to modify in deployment
+  -f, --deployment string       Deployment file with configuration that should be updated
+  -d, --destinationDir string   Destination where to write resulting filesn (default ".")
+  -h, --help                    help for merge
+  -n, --namespace string        Kubernetes namespace for which files should be generated for (default "dev")
+  -w, --overwrite               Should configuration definitions be completely replaced by the new one or just appended
+  -s, --secretName string       Name of the secret to use in the deployment mappings (defaults to 'containerName')
 ```

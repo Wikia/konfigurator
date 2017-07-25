@@ -42,6 +42,7 @@ type ConsulConfig struct {
 
 var currentConfig *Config
 var variableRegex = regexp.MustCompile(`^(?P<type>\w+)\((?P<value>[^)]+)?\)(?:\s*->\s*(?P<destination>\w+))?$`)
+var layeredConsulRegex = regexp.MustCompile(`^(?P<key>[^#]+)(?:#(?P<appname>[^@]+)@(?P<environment>\w+))?$`)
 
 func Setup(cmd *cobra.Command) error {
 	levels := make([]string, len(log.AllLevels))
@@ -96,7 +97,8 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 	ret := []model.VariableDef{}
 
 	for name, value := range values {
-		def := model.VariableDef{Name: strings.TrimSpace(name)}
+		def := model.NewVariableDef()
+		def.Name = strings.TrimSpace(name)
 		matches := variableRegex.FindStringSubmatch(strings.TrimSpace(value))
 
 		if matches == nil || len(matches) != 4 {
@@ -117,8 +119,18 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 			def.Type = model.CONFIGMAP
 			def.Source = varType
 			def.Value = matches[2]
+		case model.LAYERED_CONSUL:
+			def.Type = model.CONFIGMAP
+			def.Source = varType
+			valueMatches := layeredConsulRegex.FindStringSubmatch(matches[2])
+			if len(valueMatches) != 4 {
+				return nil, fmt.Errorf("Error parsing layered consul value (%s): %s", name, value)
+			}
+			def.Value = valueMatches[1]
+			def.Context["appname"] = valueMatches[2]
+			def.Context["environment"] = valueMatches[3]
 		default:
-			return nil, fmt.Errorf("Unknown variable source (%s): %s, '%s'", name, value, varType)
+			return nil, fmt.Errorf("Unknown variable source (%s): %s", name, value)
 		}
 
 		if len(matches[3]) != 0 {
@@ -131,7 +143,7 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 			case model.SECRET:
 				def.Type = varDestination
 			default:
-				return nil, fmt.Errorf("Unknown variable type (%s): %s, '%s'", name, value, varDestination)
+				return nil, fmt.Errorf("Unknown variable type (%s): %s", name, value)
 			}
 		}
 

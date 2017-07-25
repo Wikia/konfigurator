@@ -27,6 +27,9 @@ Application:
     consul_var: consul(config/base/dev/DATACENTER)
     # This value references internal k8s variables available inside POD
     reference_var: simple(spec.nodeName)->reference
+    # This is Wikia-specific hierarchical configuration in Consul - it will try to fetch values from three different localtions in Consul (ordered):
+    # config/sample_app/development/some_key, config/sample_app/base/some_key. config/base/development/some_key
+    layered_var: layered_consul(some_key#smaple_app@development)
 ```
 
 ## Global configuration flags

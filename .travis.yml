@@ -21,7 +21,7 @@ before_deploy:
 - go get github.com/laher/goxc
 - CGO_ENABLED=0 goxc -main-dirs-exclude=vendor
 after_success:
-- if ([ "$SEND_COVERAGE" == "1" ] && [ "$TRAVIS_EVENT_TYPE" == "push" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
+- if ([ "$SEND_COVERAGE" == "1" ]); then gover && $HOME/gopath/bin/goveralls -service=travis-ci
   -coverprofile=gover.coverprofile; fi
 os:
 - linux

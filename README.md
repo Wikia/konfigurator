@@ -17,31 +17,19 @@ Application:
   Name: my_app
   Namespace: staging
   Definitions:
-    # This value will be inserted directly into configuration
-    - name: Simple Variable
-      type: config
-      source: simple
-      value: some value
+    # This value will be inserted directly into configuration (config map destination is default for simple type)
+    simple_var: simple(some value)
     # This simple secret will be inserted into secrets as it is
-    - name: Simple Secret
-      type: secret
-      source: simple
-      value: abracadabra
-    # This value will be fetched from the configured Vault server under path "/sercret/app/temp" under key "test"
-    - name: SecretVault
-      type: secret
-      source: vault
-      value: /secret/app/temp:test
+    simple_secret: simple(abracadabra)->secret
+    # This value will be fetched from the configured Vault server under path "/secret/app/temp" under key "test" (secret is also default for vault type)
+    vault_secret: vault(/secret/app/temp:test)
     # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
-    - name: ConsulValue
-      type: config
-      source: consul
-      value: config/base/dev/DATACENTER
-    # This value refences internal k8s variables available inside POD
-    - name: ReferencedValue
-      type: reference
-      source: simple
-      value: spec.nodeName
+    consul_var: consul(config/base/dev/DATACENTER)
+    # This value references internal k8s variables available inside POD
+    reference_var: simple(spec.nodeName)->reference
+    # This is Wikia-specific hierarchical configuration in Consul - it will try to fetch values from three different localtions in Consul (ordered):
+    # config/sample_app/development/some_key, config/sample_app/base/some_key. config/base/development/some_key
+    layered_var: layered_consul(some_key#smaple_app@development)
 ```
 
 ## Global configuration flags
@@ -62,8 +50,8 @@ Application:
 
 ## Available commands
 
-### download
-This command will fetch all the variables from the defined sources and put them in proper file(s).
+### get
+This command will fetch all the variables from the defined sources and output them on STDOUT as multi document YAML file.
  
 #### Available types:
 * **config** - values will be put into ConfigMaps
@@ -79,7 +67,7 @@ This command will fetch all the variables from the defined sources and put them 
 * **k8s-yaml** - will save configuration into Secret and ConfigMap YAMLs for use with kubectl
 * **envrc** - will save all configuration into shell compatible file for use in local development or testing
 
-When outputing `envrc` values with type `reference` will be omitted.
+When outputting in `envrc` format, values with type `reference` will be omitted.
 
 #### options
 ```
@@ -89,7 +77,8 @@ When outputing `envrc` values with type `reference` will be omitted.
   -n, --namespace string           Kubernetes namespace for which files should be generated for (default "dev")
   -o, --output string              Output format (available formats: [envrc k8s-yaml]) (default "k8s-yaml")
 ```
-### update
+
+### set
 This command will update k8s POD definition with the configured variables and secrets inserting references to proper ConfigMap and Secret.
 All variables will be injected as environment variables with names the same as variable name.
 
@@ -104,4 +93,20 @@ All variables will be injected as environment variables with names the same as v
   -w, --overwrite                Should configuration definitions be completely replaced by the new one or just appended
   -s, --secrets string           File where Secrets are stored
   -y, --yes                      Answer all questions 'yes' - no confirmations and interaction
+```
+
+### merge
+This command will take deployment file and insert in-line values for config (non-secrets) as env variables and reference
+any secrets specified in the configuration. It will put in specified folder resulting files (updated deployment and secrets file).
+
+#### options
+
+```
+  -t, --containerName string    Name of the container to modify in deployment
+  -f, --deployment string       Deployment file with configuration that should be updated
+  -d, --destinationDir string   Destination where to write resulting filesn (default ".")
+  -h, --help                    help for merge
+  -n, --namespace string        Kubernetes namespace for which files should be generated for (default "dev")
+  -w, --overwrite               Should configuration definitions be completely replaced by the new one or just appended
+  -s, --secretName string       Name of the secret to use in the deployment mappings (defaults to 'containerName')
 ```

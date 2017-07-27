@@ -15,6 +15,8 @@ import (
 
 	"strings"
 
+	"io"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/helpers"
 	v1 "k8s.io/client-go/pkg/api/v1"
@@ -63,8 +65,8 @@ func ReadSecrets(filePath string) (*v1.Secret, [][]byte, error) {
 	return &secret, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteSecrets(secret *v1.Secret, leftOver [][]byte, filePath string) error {
-	return writeK8sYaml(secret, leftOver, filePath)
+func WriteSecrets(secret *v1.Secret, leftOver [][]byte, writer io.Writer) error {
+	return writeK8sYaml(secret, leftOver, writer)
 }
 
 func ReadConfigMap(filePath string) (*v1.ConfigMap, [][]byte, error) {
@@ -99,8 +101,8 @@ func ReadConfigMap(filePath string) (*v1.ConfigMap, [][]byte, error) {
 	return &configMap, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteConfigMap(configMap *v1.ConfigMap, leftOver [][]byte, filePath string) error {
-	return writeK8sYaml(configMap, leftOver, filePath)
+func WriteConfigMap(configMap *v1.ConfigMap, leftOver [][]byte, writer io.Writer) error {
+	return writeK8sYaml(configMap, leftOver, writer)
 }
 
 func ReadDeployment(filePath string) (*v1beta1.Deployment, [][]byte, error) {
@@ -135,8 +137,8 @@ func ReadDeployment(filePath string) (*v1beta1.Deployment, [][]byte, error) {
 	return &deployment, append(documents[0:idx], documents[idx+1:]...), nil
 }
 
-func WriteDeployment(deployment *v1beta1.Deployment, leftOver [][]byte, filePath string) error {
-	return writeK8sYaml(deployment, leftOver, filePath)
+func WriteDeployment(deployment *v1beta1.Deployment, leftOver [][]byte, writer io.Writer) error {
+	return writeK8sYaml(deployment, leftOver, writer)
 }
 
 func marshalK8sEntity(obj interface{}) ([]byte, error) {
@@ -156,14 +158,7 @@ func marshalK8sEntity(obj interface{}) ([]byte, error) {
 	return output, nil
 }
 
-func writeK8sYaml(obj interface{}, leftOver [][]byte, filePath string) error {
-	secretFile, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-
-	defer secretFile.Close()
-
+func writeK8sYaml(obj interface{}, leftOver [][]byte, writer io.Writer) error {
 	output, err := marshalK8sEntity(obj)
 
 	if err != nil {
@@ -172,7 +167,7 @@ func writeK8sYaml(obj interface{}, leftOver [][]byte, filePath string) error {
 
 	leftOver = append(leftOver, output)
 
-	_, err = secretFile.Write(bytes.Join(leftOver, yamlDocumentSeparator))
+	_, err = writer.Write(bytes.Join(leftOver, yamlDocumentSeparator))
 
 	if err != nil {
 		return err
@@ -199,18 +194,84 @@ func DiffDeploymets(deployment1 *v1beta1.Deployment, deployment2 *v1beta1.Deploy
 	return nil
 }
 
-func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, secret *v1.Secret, containerName string, variables []VariableDef, overwriteEnv bool) error {
-	var dstContainer *v1.Container
-
+func getDeploymentContainer(deployment *v1beta1.Deployment, containerName string) (*v1.Container, error) {
 	for idx, container := range deployment.Spec.Template.Spec.Containers {
 		if container.Name == containerName {
-			dstContainer = &deployment.Spec.Template.Spec.Containers[idx]
-			break
+			return &deployment.Spec.Template.Spec.Containers[idx], nil
 		}
 	}
 
-	if dstContainer == nil {
-		return fmt.Errorf("Could not find container '%s' in deployment", containerName)
+	return nil, fmt.Errorf("Could not find container '%s' in deployment", containerName)
+}
+
+func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variable, secretName string, containerName string, overwriteEnv bool) error {
+	dstContainer, err := getDeploymentContainer(deployment, containerName)
+
+	if err != nil {
+		return err
+	}
+
+	if overwriteEnv {
+		dstContainer.Env = []v1.EnvVar{}
+	}
+
+	for _, variable := range variables {
+		var envVarSource *v1.EnvVarSource
+		var envVarSimple *v1.EnvVar
+
+		switch variable.Type {
+		case CONFIGMAP:
+			envVarSimple = &v1.EnvVar{
+				Name:  strings.ToUpper(variable.Name),
+				Value: variable.Value.(string),
+			}
+		case SECRET:
+			envVarSource = &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					Key:                  strings.ToLower(variable.Name),
+					LocalObjectReference: v1.LocalObjectReference{Name: secretName},
+				},
+			}
+		case REFERENCE:
+			envVarSource = &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					FieldPath: variable.Value.(string),
+				},
+			}
+		}
+
+		for _, envVar := range dstContainer.Env {
+			if envVar.Name == strings.ToUpper(variable.Name) {
+				if envVarSource != nil {
+					envVar.Value = ""
+					envVar.ValueFrom = envVarSource
+					envVarSource = nil
+				} else if envVarSimple != nil {
+					envVar.Value = envVarSimple.Value
+					envVar.ValueFrom = nil
+					envVarSimple = nil
+				}
+				break
+			}
+		}
+
+		if envVarSource != nil {
+			dstContainer.Env = append(dstContainer.Env, v1.EnvVar{Name: strings.ToUpper(variable.Name), ValueFrom: envVarSource})
+			envVarSource = nil
+		} else if envVarSimple != nil {
+			dstContainer.Env = append(dstContainer.Env, *envVarSimple)
+			envVarSimple = nil
+		}
+	}
+
+	return nil
+}
+
+func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, secret *v1.Secret, containerName string, variables []VariableDef, overwriteEnv bool) error {
+	dstContainer, err := getDeploymentContainer(deployment, containerName)
+
+	if err != nil {
+		return err
 	}
 
 	if overwriteEnv {
@@ -243,10 +304,10 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 			}
 		}
 
-		for _, envs := range dstContainer.Env {
-			if envs.Name == strings.ToUpper(variable.Name) {
-				envs.Value = ""
-				envs.ValueFrom = envVarSource
+		for _, envVar := range dstContainer.Env {
+			if envVar.Name == strings.ToUpper(variable.Name) {
+				envVar.Value = ""
+				envVar.ValueFrom = envVarSource
 				envVarSource = nil
 				break
 			}

@@ -29,7 +29,7 @@ const (
 )
 
 type Command struct {
-	Ui    cli.Ui
+	UI    cli.Ui
 	Flags FlagSetFlags
 
 	flagSet *flag.FlagSet
@@ -101,10 +101,10 @@ func (c *Command) httpFlagsClient(f *flag.FlagSet) *flag.FlagSet {
 		"Path to a directory of CA certificates to use for TLS when communicating "+
 			"with Consul. This can also be specified via the CONSUL_CAPATH environment variable.")
 	f.Var(&c.certFile, "client-cert",
-		"Path to a client cert file to use for TLS when `verify_incoming` is enabled. This "+
+		"Path to a client cert file to use for TLS when 'verify_incoming' is enabled. This "+
 			"can also be specified via the CONSUL_CLIENT_CERT environment variable.")
 	f.Var(&c.keyFile, "client-key",
-		"Path to a client key file to use for TLS when `verify_incoming` is enabled. This "+
+		"Path to a client key file to use for TLS when 'verify_incoming' is enabled. This "+
 			"can also be specified via the CONSUL_CLIENT_KEY environment variable.")
 	f.Var(&c.httpAddr, "http-addr",
 		"The `address` and port of the Consul HTTP agent. The value can be an IP "+
@@ -145,7 +145,7 @@ func (c *Command) httpFlagsServer(f *flag.FlagSet) *flag.FlagSet {
 // generates help output and adds the appropriate API flags.
 func (c *Command) NewFlagSet(command cli.Command) *flag.FlagSet {
 	f := flag.NewFlagSet("", flag.ContinueOnError)
-	f.Usage = func() { c.Ui.Error(command.Help()) }
+	f.Usage = func() { c.UI.Error(command.Help()) }
 
 	if c.hasClientHTTP() {
 		c.httpFlagsClient(f)
@@ -159,7 +159,7 @@ func (c *Command) NewFlagSet(command cli.Command) *flag.FlagSet {
 	errScanner := bufio.NewScanner(errR)
 	go func() {
 		for errScanner.Scan() {
-			c.Ui.Error(errScanner.Text())
+			c.UI.Error(errScanner.Text())
 		}
 	}()
 	f.SetOutput(errW)

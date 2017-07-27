@@ -31,7 +31,7 @@ type secretIDStorageEntry struct {
 	// operation
 	SecretIDNumUses int `json:"secret_id_num_uses" structs:"secret_id_num_uses" mapstructure:"secret_id_num_uses"`
 
-	// Duration after which this SecretID should expire. This is croleed by
+	// Duration after which this SecretID should expire. This is capped by
 	// the backend mount's max TTL value.
 	SecretIDTTL time.Duration `json:"secret_id_ttl" structs:"secret_id_ttl" mapstructure:"secret_id_ttl"`
 
@@ -273,7 +273,7 @@ func (b *backend) validateBindSecretID(req *logical.Request, roleName, secretID,
 func verifyCIDRRoleSecretIDSubset(secretIDCIDRs []string, roleBoundCIDRList string) error {
 	if len(secretIDCIDRs) != 0 {
 		// Parse the CIDRs on role as a slice
-		roleCIDRs := strutil.ParseDedupAndSortStrings(roleBoundCIDRList, ",")
+		roleCIDRs := strutil.ParseDedupLowercaseAndSortStrings(roleBoundCIDRList, ",")
 
 		// If there are no CIDR blocks on the role, then the subset
 		// requirement would be satisfied
@@ -352,7 +352,7 @@ func (b *backend) nonLockedSecretIDStorageEntry(s logical.Storage, roleNameHMAC,
 
 	if persistNeeded {
 		if err := b.nonLockedSetSecretIDStorageEntry(s, roleNameHMAC, secretIDHMAC, &result); err != nil {
-			return nil, fmt.Errorf("failed to upgrade role storage entry", err)
+			return nil, fmt.Errorf("failed to upgrade role storage entry %s", err)
 		}
 	}
 
@@ -469,7 +469,9 @@ func (b *backend) secretIDAccessorEntry(s logical.Storage, secretIDAccessor stri
 	var result secretIDAccessorStorageEntry
 
 	// Create index entry, mapping the accessor to the token ID
+	b.saltMutex.RLock()
 	entryIndex := "accessor/" + b.salt.SaltID(secretIDAccessor)
+	b.saltMutex.RUnlock()
 
 	accessorLock := b.secretIDAccessorLock(secretIDAccessor)
 	accessorLock.RLock()
@@ -498,7 +500,9 @@ func (b *backend) createSecretIDAccessorEntry(s logical.Storage, entry *secretID
 	entry.SecretIDAccessor = accessorUUID
 
 	// Create index entry, mapping the accessor to the token ID
+	b.saltMutex.RLock()
 	entryIndex := "accessor/" + b.salt.SaltID(entry.SecretIDAccessor)
+	b.saltMutex.RUnlock()
 
 	accessorLock := b.secretIDAccessorLock(accessorUUID)
 	accessorLock.Lock()
@@ -517,7 +521,9 @@ func (b *backend) createSecretIDAccessorEntry(s logical.Storage, entry *secretID
 
 // deleteSecretIDAccessorEntry deletes the storage index mapping the accessor to a SecretID.
 func (b *backend) deleteSecretIDAccessorEntry(s logical.Storage, secretIDAccessor string) error {
+	b.saltMutex.RLock()
 	accessorEntryIndex := "accessor/" + b.salt.SaltID(secretIDAccessor)
+	b.saltMutex.RUnlock()
 
 	accessorLock := b.secretIDAccessorLock(secretIDAccessor)
 	accessorLock.Lock()

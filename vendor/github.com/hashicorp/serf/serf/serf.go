@@ -241,18 +241,13 @@ func Create(conf *Config) (*Serf, error) {
 			conf.ProtocolVersion, ProtocolVersionMin, ProtocolVersionMax)
 	}
 
-	if conf.LogOutput != nil && conf.Logger != nil {
-		return nil, fmt.Errorf("Cannot specify both LogOutput and Logger. Please choose a single log configuration setting.")
-	}
-
-	logDest := conf.LogOutput
-	if logDest == nil {
-		logDest = os.Stderr
-	}
-
 	logger := conf.Logger
 	if logger == nil {
-		logger = log.New(logDest, "", log.LstdFlags)
+		logOutput := conf.LogOutput
+		if logOutput == nil {
+			logOutput = os.Stderr
+		}
+		logger = log.New(logOutput, "", log.LstdFlags)
 	}
 
 	serf := &Serf{
@@ -1658,17 +1653,18 @@ func (s *Serf) Stats() map[string]string {
 		return strconv.FormatUint(v, 10)
 	}
 	stats := map[string]string{
-		"members":      toString(uint64(len(s.members))),
-		"failed":       toString(uint64(len(s.failedMembers))),
-		"left":         toString(uint64(len(s.leftMembers))),
-		"health_score": toString(uint64(s.memberlist.GetHealthScore())),
-		"member_time":  toString(uint64(s.clock.Time())),
-		"event_time":   toString(uint64(s.eventClock.Time())),
-		"query_time":   toString(uint64(s.queryClock.Time())),
-		"intent_queue": toString(uint64(s.broadcasts.NumQueued())),
-		"event_queue":  toString(uint64(s.eventBroadcasts.NumQueued())),
-		"query_queue":  toString(uint64(s.queryBroadcasts.NumQueued())),
-		"encrypted":    fmt.Sprintf("%v", s.EncryptionEnabled()),
+		"members":           toString(uint64(len(s.members))),
+		"failed":            toString(uint64(len(s.failedMembers))),
+		"left":              toString(uint64(len(s.leftMembers))),
+		"health_score":      toString(uint64(s.memberlist.GetHealthScore())),
+		"member_time":       toString(uint64(s.clock.Time())),
+		"event_time":        toString(uint64(s.eventClock.Time())),
+		"query_time":        toString(uint64(s.queryClock.Time())),
+		"intent_queue":      toString(uint64(s.broadcasts.NumQueued())),
+		"event_queue":       toString(uint64(s.eventBroadcasts.NumQueued())),
+		"query_queue":       toString(uint64(s.queryBroadcasts.NumQueued())),
+		"encrypted":         fmt.Sprintf("%v", s.EncryptionEnabled()),
+		"coordinate_resets": toString(uint64(s.coordClient.Stats().Resets)),
 	}
 	return stats
 }

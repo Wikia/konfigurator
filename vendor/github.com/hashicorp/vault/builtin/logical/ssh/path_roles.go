@@ -143,15 +143,17 @@ func pathRoles(b *backend) *framework.Path {
 			"allowed_users": &framework.FieldSchema{
 				Type: framework.TypeString,
 				Description: `
-				[Optional for all types]
-				If this option is not specified, client can request for a
+				[Optional for all types] [Works differently for CA type]
+				If this option is not specified, or is '*', client can request a
 				credential for any valid user at the remote host, including the
 				admin user. If only certain usernames are to be allowed, then
 				this list enforces it. If this field is set, then credentials
 				can only be created for default_user and usernames present in
 				this list. Setting this option will enable all the users with
 				access this role to fetch credentials for all other usernames
-				in this list. Use with caution.
+				in this list. Use with caution. N.B.: with the CA type, an empty
+				list means that no users are allowed; explicitly specify '*' to
+				allow any user.
 				`,
 			},
 			"allowed_domains": &framework.FieldSchema{
@@ -420,7 +422,6 @@ func (b *backend) pathRoleWrite(req *logical.Request, d *framework.FieldData) (*
 }
 
 func (b *backend) createCARole(allowedUsers, defaultUser string, data *framework.FieldData) (*sshRole, *logical.Response) {
-
 	role := &sshRole{
 		MaxTTL: data.Get("max_ttl").(string),
 		TTL:    data.Get("ttl").(string),
@@ -435,6 +436,10 @@ func (b *backend) createCARole(allowedUsers, defaultUser string, data *framework
 		AllowSubdomains:        data.Get("allow_subdomains").(bool),
 		AllowUserKeyIDs:        data.Get("allow_user_key_ids").(bool),
 		KeyType:                KeyTypeCA,
+	}
+
+	if !role.AllowUserCertificates && !role.AllowHostCertificates {
+		return nil, logical.ErrorResponse("Either 'allow_user_certificates' or 'allow_host_certificates' must be set to 'true'")
 	}
 
 	defaultCriticalOptions := convertMapToStringValue(data.Get("default_critical_options").(map[string]interface{}))

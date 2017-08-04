@@ -21,7 +21,7 @@ Application:
     simple_var: simple(some value)
     # This simple secret will be inserted into secrets as it is
     simple_secret: simple(abracadabra)->secret
-    # This value will be inserted directly into a config map
+    # This value will be inserted into a config map
     simple_var: simple(some value)->config
     # This value will be fetched from the configured Vault server under path "/secret/app/temp" under key "test" (secret is also default for vault type)
     vault_secret: vault(/secret/app/temp:test)

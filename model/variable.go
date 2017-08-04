@@ -6,6 +6,7 @@ const (
 	CONFIGMAP VariableType = "config"
 	SECRET                 = "secret"
 	REFERENCE              = "reference"
+	INLINE                 = "inline"
 )
 
 type VariableDef struct {

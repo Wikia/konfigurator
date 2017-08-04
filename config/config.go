@@ -108,7 +108,7 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 		varType := model.InputType(matches[1])
 		switch varType {
 		case model.SIMPLE:
-			def.Type = model.CONFIGMAP
+			def.Type = model.INLINE
 			def.Source = varType
 			def.Value = matches[2]
 		case model.VAULT:
@@ -116,11 +116,11 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 			def.Source = varType
 			def.Value = matches[2]
 		case model.CONSUL:
-			def.Type = model.CONFIGMAP
+			def.Type = model.INLINE
 			def.Source = varType
 			def.Value = matches[2]
 		case model.LAYERED_CONSUL:
-			def.Type = model.CONFIGMAP
+			def.Type = model.INLINE
 			def.Source = varType
 			valueMatches := layeredConsulRegex.FindStringSubmatch(matches[2])
 			if len(valueMatches) != 4 {
@@ -135,12 +135,15 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 
 		if len(matches[3]) != 0 {
 			varDestination := model.VariableType(matches[3])
+
 			switch varDestination {
 			case model.CONFIGMAP:
 				def.Type = varDestination
 			case model.REFERENCE:
 				def.Type = varDestination
 			case model.SECRET:
+				def.Type = varDestination
+			case model.INLINE:
 				def.Type = varDestination
 			default:
 				return nil, fmt.Errorf("Unknown variable type (%s): %s", name, value)

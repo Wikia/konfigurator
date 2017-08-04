@@ -33,6 +33,7 @@ import (
 
 var (
 	SecretName     string
+	ConfigMapName  string
 	DestinationDir string
 )
 
@@ -82,8 +83,10 @@ var mergeCmd = &cobra.Command{
 		if len(SecretName) == 0 {
 			SecretName = ContainerName
 		}
-
-		err = model.UpdateDeploymentInPlace(deployment, variables, SecretName, ContainerName, Overwrite)
+		if len(ConfigMapName) == 0 {
+			ConfigMapName = ContainerName
+		}
+		err = model.UpdateDeploymentInPlace(deployment, variables, ConfigMapName, SecretName, ContainerName, Overwrite)
 
 		if err != nil {
 			return fmt.Errorf("Error updating deployment: %s", err)
@@ -142,7 +145,8 @@ func init() {
 	mergeCmd.Flags().StringVarP(&DeploymentFile, "deployment", "f", "", "Deployment file with configuration that should be updated")
 	mergeCmd.Flags().StringVarP(&ContainerName, "containerName", "t", "", "Name of the container to modify in deployment")
 	mergeCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
+	mergeCmd.Flags().StringVarP(&ConfigMapName, "configMapName", "c", "", "Name of the ConfigMap to use in the deployment mappings (defaults to 'containerName')")
 	mergeCmd.Flags().StringVarP(&SecretName, "secretName", "s", "", "Name of the secret to use in the deployment mappings (defaults to 'containerName')")
 	mergeCmd.Flags().StringVarP(&DestinationDir, "destinationDir", "d", ".", "Destination where to write resulting filesn")
-	mergeCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
+	mergeCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", true, "Should configuration definitions be completely replaced by the new one or just appended (defaults to true)")
 }

@@ -135,7 +135,6 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 
 		if len(matches[3]) != 0 {
 			varDestination := model.VariableType(matches[3])
-
 			switch varDestination {
 			case model.CONFIGMAP:
 				def.Type = varDestination

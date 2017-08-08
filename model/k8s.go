@@ -204,7 +204,7 @@ func getDeploymentContainer(deployment *v1beta1.Deployment, containerName string
 	return nil, fmt.Errorf("Could not find container '%s' in deployment", containerName)
 }
 
-func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variable, secretName string, containerName string, overwriteEnv bool) error {
+func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variable, configMapName string, secretName string, containerName string, overwriteEnv bool) error {
 	dstContainer, err := getDeploymentContainer(deployment, containerName)
 
 	if err != nil {
@@ -220,10 +220,17 @@ func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variabl
 		var envVarSimple *v1.EnvVar
 
 		switch variable.Type {
-		case CONFIGMAP:
+		case INLINE:
 			envVarSimple = &v1.EnvVar{
 				Name:  strings.ToUpper(variable.Name),
 				Value: variable.Value.(string),
+			}
+		case CONFIGMAP:
+			envVarSource = &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					Key:                  strings.ToLower(variable.Name),
+					LocalObjectReference: v1.LocalObjectReference{Name: configMapName},
+				},
 			}
 		case SECRET:
 			envVarSource = &v1.EnvVarSource{
@@ -280,8 +287,14 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 
 	for _, variable := range variables {
 		var envVarSource *v1.EnvVarSource
+		var envVarSimple *v1.EnvVar
 
 		switch variable.Type {
+		case INLINE:
+			envVarSimple = &v1.EnvVar{
+				Name:  strings.ToUpper(variable.Name),
+				Value: variable.Value.(string),
+			}
 		case CONFIGMAP:
 			envVarSource = &v1.EnvVarSource{
 				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
@@ -316,7 +329,11 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 		if envVarSource != nil {
 			dstContainer.Env = append(dstContainer.Env, v1.EnvVar{Name: strings.ToUpper(variable.Name), ValueFrom: envVarSource})
 			envVarSource = nil
+		} else if envVarSimple != nil {
+			dstContainer.Env = append(dstContainer.Env, *envVarSimple)
+			envVarSimple = nil
 		}
+
 	}
 
 	return nil

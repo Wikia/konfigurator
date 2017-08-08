@@ -148,5 +148,5 @@ func init() {
 	setCmd.Flags().StringVarP(&SecretsFile, "secrets", "s", "", "File where Secrets are stored")
 	setCmd.Flags().StringVarP(&DestinationFile, "destinationFile", "d", "", "Destination file where to write updated deployment configuration")
 	setCmd.Flags().BoolVarP(&NoConfirm, "yes", "y", false, "Answer all questions 'yes' - no confirmations and interaction")
-	setCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", false, "Should configuration definitions be completely replaced by the new one or just appended")
+	setCmd.Flags().BoolVarP(&Overwrite, "overwrite", "w", true, "Should configuration definitions be completely replaced by the new one or just appended")
 }

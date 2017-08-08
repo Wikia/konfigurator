@@ -17,10 +17,12 @@ Application:
   Name: my_app
   Namespace: staging
   Definitions:
-    # This value will be inserted directly into configuration (config map destination is default for simple type)
+    # This value will be inserted directly into configuration
     simple_var: simple(some value)
     # This simple secret will be inserted into secrets as it is
     simple_secret: simple(abracadabra)->secret
+    # This value will be inserted into a config map
+    simple_var: simple(some value)->config
     # This value will be fetched from the configured Vault server under path "/secret/app/temp" under key "test" (secret is also default for vault type)
     vault_secret: vault(/secret/app/temp:test)
     # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
@@ -107,6 +109,7 @@ any secrets specified in the configuration. It will put in specified folder resu
   -d, --destinationDir string   Destination where to write resulting filesn (default ".")
   -h, --help                    help for merge
   -n, --namespace string        Kubernetes namespace for which files should be generated for (default "dev")
-  -w, --overwrite               Should configuration definitions be completely replaced by the new one or just appended
+  -w, --overwrite               Should configuration definitions be completely replaced by the new one or just appended (defaults to true)
   -s, --secretName string       Name of the secret to use in the deployment mappings (defaults to 'containerName')
+  -c, --configMapName string    Name of the ConfigMap to use in the deployment mappings (defaults to 'containerName')
 ```

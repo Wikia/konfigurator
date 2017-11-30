@@ -38,6 +38,9 @@ func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, va
 	}
 
 	for _, variable := range vars {
+		if variable.Type == model.REFERENCED {
+			continue
+		}
 		switch variable.Destination {
 		case model.SECRET:
 			secrets.Data[variable.Name] = []byte(variable.Value.(string))

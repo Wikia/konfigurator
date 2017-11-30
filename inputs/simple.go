@@ -10,13 +10,14 @@ type Simple struct{}
 
 func (i *Simple) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	if variable.Source != model.SIMPLE {
-		return nil, fmt.Errorf("Invalid variable type: %s for %s", variable.Type, variable.Name)
+		return nil, fmt.Errorf("Invalid variable source: %s for %s", variable.Source, variable.Name)
 	}
 
 	ret := model.Variable{
-		Name:  variable.Name,
-		Type:  variable.Type,
-		Value: variable.Value,
+		Name:        variable.Name,
+		Type:        model.INLINE,
+		Destination: variable.Destination,
+		Value:       variable.Value,
 	}
 
 	return &ret, nil

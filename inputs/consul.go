@@ -51,7 +51,7 @@ func (c *Consul) initClient() error {
 
 func (c *Consul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	if variable.Source != model.CONSUL {
-		return nil, fmt.Errorf("ConsulInput: Invalid variable type: %s for %s", variable.Type, variable.Name)
+		return nil, fmt.Errorf("ConsulInput: Invalid variable source: %s for %s", variable.Source, variable.Name)
 	}
 
 	if c.client == nil {
@@ -80,9 +80,10 @@ func (c *Consul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	}).Debug("Read variable from consul")
 
 	ret := model.Variable{
-		Name:  variable.Name,
-		Type:  variable.Type,
-		Value: string(consulValue.Value),
+		Name:        variable.Name,
+		Type:        model.STANDARD,
+		Destination: variable.Destination,
+		Value:       string(consulValue.Value),
 	}
 
 	return &ret, nil

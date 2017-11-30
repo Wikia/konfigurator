@@ -219,31 +219,48 @@ func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variabl
 		var envVarSource *v1.EnvVarSource
 		var envVarSimple *v1.EnvVar
 
-		switch variable.Type {
-		case INLINE:
-			envVarSimple = &v1.EnvVar{
-				Name:  strings.ToUpper(variable.Name),
-				Value: variable.Value.(string),
-			}
+		switch variable.Destination {
 		case CONFIGMAP:
-			envVarSource = &v1.EnvVarSource{
-				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
-					Key:                  strings.ToLower(variable.Name),
-					LocalObjectReference: v1.LocalObjectReference{Name: configMapName},
-				},
+			switch variable.Type {
+			case REFERENCED:
+				envVarSource = &v1.EnvVarSource{
+					FieldRef: &v1.ObjectFieldSelector{
+						FieldPath: variable.Value.(string),
+					},
+				}
+			case STANDARD:
+				envVarSource = &v1.EnvVarSource{
+					ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+						Key:                  strings.ToLower(variable.Name),
+						LocalObjectReference: v1.LocalObjectReference{Name: configMapName},
+					},
+				}
+			case INLINE:
+				envVarSimple = &v1.EnvVar{
+					Name:  strings.ToUpper(variable.Name),
+					Value: variable.Value.(string),
+				}
 			}
 		case SECRET:
-			envVarSource = &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					Key:                  strings.ToLower(variable.Name),
-					LocalObjectReference: v1.LocalObjectReference{Name: secretName},
-				},
-			}
-		case REFERENCE:
-			envVarSource = &v1.EnvVarSource{
-				FieldRef: &v1.ObjectFieldSelector{
-					FieldPath: variable.Value.(string),
-				},
+			switch variable.Type {
+			case REFERENCED:
+				envVarSource = &v1.EnvVarSource{
+					FieldRef: &v1.ObjectFieldSelector{
+						FieldPath: variable.Value.(string),
+					},
+				}
+			case STANDARD:
+				envVarSource = &v1.EnvVarSource{
+					SecretKeyRef: &v1.SecretKeySelector{
+						Key:                  strings.ToLower(variable.Name),
+						LocalObjectReference: v1.LocalObjectReference{Name: secretName},
+					},
+				}
+			case INLINE:
+				envVarSimple = &v1.EnvVar{
+					Name:  strings.ToUpper(variable.Name),
+					Value: variable.Value.(string),
+				}
 			}
 		}
 
@@ -289,7 +306,7 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 		var envVarSource *v1.EnvVarSource
 		var envVarSimple *v1.EnvVar
 
-		switch variable.Type {
+		switch variable.Destination {
 		case INLINE:
 			envVarSimple = &v1.EnvVar{
 				Name:  strings.ToUpper(variable.Name),

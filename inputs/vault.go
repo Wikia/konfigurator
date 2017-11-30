@@ -67,7 +67,7 @@ func (v *Vault) initClient() error {
 
 func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	if variable.Source != model.VAULT {
-		return nil, fmt.Errorf("Invalid variable type: %s for %s", variable.Type, variable.Name)
+		return nil, fmt.Errorf("Invalid variable source: %s for %s", variable.Source, variable.Name)
 	}
 
 	if v.client == nil {
@@ -97,9 +97,10 @@ func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	}).Debug("Read variable from vault")
 
 	ret := model.Variable{
-		Name:  variable.Name,
-		Type:  variable.Type,
-		Value: secret.Data[source[1]],
+		Name:        variable.Name,
+		Type:        model.STANDARD,
+		Destination: variable.Destination,
+		Value:       secret.Data[source[1]],
 	}
 
 	return &ret, nil

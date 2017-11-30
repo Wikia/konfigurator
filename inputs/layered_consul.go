@@ -51,7 +51,7 @@ func (c *LayeredConsul) initClient() error {
 
 func (c *LayeredConsul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	if variable.Source != model.LAYERED_CONSUL {
-		return nil, fmt.Errorf("LayeredConsulInput: Invalid variable type: %s for %s", variable.Type, variable.Name)
+		return nil, fmt.Errorf("LayeredConsulInput: Invalid variable source: %s for %s", variable.Source, variable.Name)
 	}
 
 	if c.client == nil {
@@ -82,9 +82,10 @@ func (c *LayeredConsul) Fetch(variable model.VariableDef) (*model.Variable, erro
 			}).Debug("LayeredConsulInput: Read variable from consul")
 
 			ret := model.Variable{
-				Name:  variable.Name,
-				Type:  variable.Type,
-				Value: string(consulValue.Value),
+				Name:        variable.Name,
+				Type:        model.STANDARD,
+				Destination: variable.Destination,
+				Value:       string(consulValue.Value),
 			}
 
 			return &ret, nil

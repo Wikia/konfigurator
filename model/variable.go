@@ -1,20 +1,18 @@
 package model
 
-type VariableType string
+type VariableDestination string
 
 const (
-	CONFIGMAP VariableType = "config"
-	SECRET                 = "secret"
-	REFERENCE              = "reference"
-	INLINE                 = "inline"
+	CONFIGMAP VariableDestination = "config"
+	SECRET                        = "secret"
 )
 
 type VariableDef struct {
-	Name    string
-	Source  InputType
-	Type    VariableType
-	Value   interface{}
-	Context map[string]string
+	Name        string
+	Source      InputType
+	Destination VariableDestination
+	Value       interface{}
+	Context     map[string]string
 }
 
 func NewVariableDef() VariableDef {

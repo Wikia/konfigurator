@@ -28,7 +28,7 @@ Application:
     # This value will be fetched from configured Consul server from the KV path "config/base/dev/DATACENTER"
     consul_var: consul(config/base/dev/DATACENTER)
     # This value references internal k8s variables available inside POD
-    reference_var: simple(spec.nodeName)->reference
+    reference_var: reference(spec.nodeName)->config
     # This is Wikia-specific hierarchical configuration in Consul - it will try to fetch values from three different localtions in Consul (ordered):
     # config/sample_app/development/some_key, config/sample_app/base/some_key. config/base/development/some_key
     layered_var: layered_consul(some_key#smaple_app@development)
@@ -55,19 +55,21 @@ Application:
 ### get
 This command will fetch all the variables from the defined sources and output them on STDOUT as multi document YAML file.
  
-#### Available types:
+#### Available destinations:
 * **config** - values will be put into ConfigMaps
 * **secret** - values will be encoded and put into Secrets
-* **reference** - values will be put into Deployment as reference to other POD variables
 
 #### Available sources:
 * **simple** - values are stored statically in the configuration file
 * **vault** - values are fetched from the Vault server (you will need proper token to authorize with the server)
 * **consul** - values are fetched from the Consul's KV store
+* **layered_consul** - values are fetched from the Consul's KV store from multiple paths and merged together
+* **reference** - values will be put into Deployment as reference to other POD variables
 
 #### Available output formats:
 * **k8s-yaml** - will save configuration into Secret and ConfigMap YAMLs for use with kubectl
 * **envrc** - will save all configuration into shell compatible file for use in local development or testing
+* **envoneline** - will output all variables in one line - useful when running shell scripts
 
 When outputting in `envrc` format, values with type `reference` will be omitted.
 

@@ -98,6 +98,7 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 
 	for name, value := range values {
 		def := model.NewVariableDef()
+		def.Destination = model.CONFIGMAP
 		def.Name = strings.TrimSpace(name)
 		matches := variableRegex.FindStringSubmatch(strings.TrimSpace(value))
 
@@ -108,19 +109,19 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 		varType := model.InputType(matches[1])
 		switch varType {
 		case model.SIMPLE:
-			def.Type = model.INLINE
+			def.Source = varType
+			def.Value = matches[2]
+		case model.REFERENCE:
 			def.Source = varType
 			def.Value = matches[2]
 		case model.VAULT:
-			def.Type = model.SECRET
 			def.Source = varType
 			def.Value = matches[2]
+			def.Destination = model.SECRET
 		case model.CONSUL:
-			def.Type = model.INLINE
 			def.Source = varType
 			def.Value = matches[2]
 		case model.LAYERED_CONSUL:
-			def.Type = model.INLINE
 			def.Source = varType
 			valueMatches := layeredConsulRegex.FindStringSubmatch(matches[2])
 			if len(valueMatches) != 4 {
@@ -130,20 +131,16 @@ func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, er
 			def.Context["appname"] = valueMatches[2]
 			def.Context["environment"] = valueMatches[3]
 		default:
-			return nil, fmt.Errorf("Unknown variable source (%s): %s", name, value)
+			return nil, fmt.Errorf("Unknown variable source (%s): %s", varType, value)
 		}
 
 		if len(matches[3]) != 0 {
-			varDestination := model.VariableType(matches[3])
+			varDestination := model.VariableDestination(matches[3])
 			switch varDestination {
 			case model.CONFIGMAP:
-				def.Type = varDestination
-			case model.REFERENCE:
-				def.Type = varDestination
+				def.Destination = varDestination
 			case model.SECRET:
-				def.Type = varDestination
-			case model.INLINE:
-				def.Type = varDestination
+				def.Destination = varDestination
 			default:
 				return nil, fmt.Errorf("Unknown variable type (%s): %s", name, value)
 			}

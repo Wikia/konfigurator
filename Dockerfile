@@ -9,7 +9,3 @@ ENTRYPOINT ["/opt/bin/konfigurator"]
 VOLUME /config
 ENV HOME="/config"
 WORKDIR /config
-
-RUN chown 65534:65534 /config
-
-USER 65534:65534

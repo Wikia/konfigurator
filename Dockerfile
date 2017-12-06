@@ -1,4 +1,4 @@
-FROM scratch
+FROM alpine
 
 ARG DOCKER_BINARY
 

@@ -1,7 +1,12 @@
-FROM alpine
+FROM alpine:3.6
 
 ARG DOCKER_BINARY
 
-ADD $DOCKER_BINARY /opt/bin/konfigurator
+ADD $DOCKER_BINARY /usr/bin/konfigurator
 
-ENTRYPOINT ["/opt/bin/konfigurator"]
+ENV HOME=/config
+RUN adduser konfigurator -D -h /config
+RUN chown -R konfigurator /config
+
+VOLUME ["/config"]
+USER konfigurator

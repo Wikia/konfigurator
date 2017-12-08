@@ -114,3 +114,5 @@ clean:
 	$(if $(filter $(OS),Windows_NT), del $(subst /,\,${BINARY}), rm ${BINARY})
 
 .PHONY: test lint vet $(TARGETS_TEST) $(TARGETS_LINT)
+
+include Makefile.docker

@@ -1,5 +1,7 @@
 FROM alpine:3.6
 
+RUN /bin/sh -c apk --no-cache add ca-certificates openssl bash # bash tmp
+
 ARG DOCKER_BINARY
 
 ADD $DOCKER_BINARY /usr/bin/konfigurator

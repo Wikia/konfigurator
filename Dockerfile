@@ -9,4 +9,3 @@ RUN adduser konfigurator -D -h /config
 RUN chown -R konfigurator /config
 
 VOLUME ["/config"]
-USER konfigurator

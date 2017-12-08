@@ -14,7 +14,7 @@ type OutputOneline struct{}
 
 func (o *OutputOneline) Save(name string, namespace string, writer io.Writer, vars []model.Variable) error {
 	for _, variable := range vars {
-		if variable.Type == model.REFERENCE {
+		if variable.Type == model.REFERENCED {
 			continue
 		}
 

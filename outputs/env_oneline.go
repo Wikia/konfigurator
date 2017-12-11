@@ -18,7 +18,10 @@ func (o *OutputOneline) Save(name string, namespace string, writer io.Writer, va
 			continue
 		}
 
-		value := escapeRegex.ReplaceAllString(variable.Value.(string), "\\$1")
+		value := fmt.Sprintf("%s", variable.Value)
+		if strings.Contains(value, "(") {
+			value = fmt.Sprintf("\"%s\"", value)
+		}
 
 		_, err := fmt.Fprintf(writer, "%s=\"%s\" ", strings.ToUpper(variable.Name), value)
 

@@ -213,6 +213,8 @@ func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variabl
 		return err
 	}
 
+	previousEnv := dstContainer.Env
+
 	if overwriteEnv {
 		dstContainer.Env = []v1.EnvVar{}
 	}
@@ -290,7 +292,42 @@ func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variabl
 		}
 	}
 
+	changed, removed, added := diffEnvs(previousEnv, dstContainer.Env)
+
+	log.WithFields(log.Fields{"changed": changed, "removed": removed, "added": added}).Info("Deployment updated")
+
 	return nil
+}
+
+func diffEnvs(src, dst []v1.EnvVar) (changed, removed, added []string) {
+	diff := map[string]byte{}
+	for _, srcEnv := range src {
+		diff[srcEnv.Name] |= 1
+		for _, dstEnv := range dst {
+			diff[dstEnv.Name] |= 2
+			if srcEnv.Name == dstEnv.Name {
+				if srcEnv.ValueFrom != nil && dstEnv.ValueFrom != nil && srcEnv.ValueFrom.String() == dstEnv.ValueFrom.String() {
+					diff[srcEnv.Name] |= 4
+				}
+				break
+			} else {
+
+			}
+		}
+	}
+
+	for name, value := range diff {
+		switch value {
+		case 1:
+			removed = append(removed, name)
+		case 3:
+			changed = append(changed, name)
+		case 2:
+			added = append(added, name)
+		}
+	}
+
+	return
 }
 
 func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, secret *v1.Secret, containerName string, variables []VariableDef, overwriteEnv bool) error {
@@ -299,6 +336,8 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 	if err != nil {
 		return err
 	}
+
+	previousEnv := dstContainer.Env
 
 	if overwriteEnv {
 		dstContainer.Env = []v1.EnvVar{}
@@ -309,30 +348,48 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 		var envVarSimple *v1.EnvVar
 
 		switch variable.Destination {
-		case INLINE:
-			envVarSimple = &v1.EnvVar{
-				Name:  strings.ToUpper(variable.Name),
-				Value: variable.Value.(string),
-			}
 		case CONFIGMAP:
-			envVarSource = &v1.EnvVarSource{
-				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
-					Key:                  strings.ToLower(variable.Name),
-					LocalObjectReference: v1.LocalObjectReference{Name: configMap.Name},
-				},
+			switch variable.Source {
+			case REFERENCE:
+				envVarSource = &v1.EnvVarSource{
+					FieldRef: &v1.ObjectFieldSelector{
+						FieldPath: variable.Value.(string),
+					},
+				}
+			case SIMPLE:
+				envVarSimple = &v1.EnvVar{
+					Name:  strings.ToUpper(variable.Name),
+					Value: variable.Value.(string),
+				}
+			default:
+				envVarSource = &v1.EnvVarSource{
+					ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+						Key:                  strings.ToLower(variable.Name),
+						LocalObjectReference: v1.LocalObjectReference{Name: configMap.Name},
+					},
+				}
 			}
+
 		case SECRET:
-			envVarSource = &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					Key:                  strings.ToLower(variable.Name),
-					LocalObjectReference: v1.LocalObjectReference{Name: secret.Name},
-				},
-			}
-		case REFERENCE:
-			envVarSource = &v1.EnvVarSource{
-				FieldRef: &v1.ObjectFieldSelector{
-					FieldPath: variable.Value.(string),
-				},
+			switch variable.Source {
+			case REFERENCE:
+				envVarSource = &v1.EnvVarSource{
+					FieldRef: &v1.ObjectFieldSelector{
+						FieldPath: variable.Value.(string),
+					},
+				}
+			case SIMPLE:
+				envVarSimple = &v1.EnvVar{
+					Name:  strings.ToUpper(variable.Name),
+					Value: variable.Value.(string),
+				}
+			default:
+				envVarSource = &v1.EnvVarSource{
+					SecretKeyRef: &v1.SecretKeySelector{
+						Key:                  strings.ToLower(variable.Name),
+						LocalObjectReference: v1.LocalObjectReference{Name: secret.Name},
+					},
+				}
 			}
 		}
 
@@ -352,8 +409,11 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 			dstContainer.Env = append(dstContainer.Env, *envVarSimple)
 			envVarSimple = nil
 		}
-
 	}
+
+	changed, removed, added := diffEnvs(previousEnv, dstContainer.Env)
+
+	log.WithFields(log.Fields{"changed": changed, "removed": removed, "added": added}).Info("Deployment updated")
 
 	return nil
 }

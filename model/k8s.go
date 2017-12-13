@@ -40,12 +40,13 @@ func ReadSecrets(filePath string) (*v1.Secret, [][]byte, error) {
 		return nil, nil, err
 	}
 
-	secret := v1.Secret{}
-	idx := 0
+	var secret v1.Secret
 	var document []byte
+	idx := 0
 	documents := splitYamlDocument(contents)
 
 	for idx, document = range documents {
+		secret = v1.Secret{}
 		err = yaml.Unmarshal(document, &secret)
 
 		if err != nil {
@@ -76,12 +77,13 @@ func ReadConfigMap(filePath string) (*v1.ConfigMap, [][]byte, error) {
 		return nil, nil, err
 	}
 
-	configMap := v1.ConfigMap{}
-	idx := 0
+	var configMap v1.ConfigMap
 	var document []byte
+	idx := 0
 	documents := splitYamlDocument(contents)
 
 	for idx, document = range documents {
+		configMap = v1.ConfigMap{}
 		err = yaml.Unmarshal(document, &configMap)
 
 		if err != nil {

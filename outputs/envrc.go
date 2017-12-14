@@ -14,7 +14,7 @@ type OutputEnvrc struct{}
 
 func (o *OutputEnvrc) Save(name string, namespace string, writer io.Writer, vars []model.Variable) error {
 	for _, variable := range vars {
-		if variable.Type == model.REFERENCED {
+		if variable.Source == model.REFERENCE {
 			continue
 		}
 

@@ -225,46 +225,41 @@ func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variabl
 
 		switch variable.Destination {
 		case CONFIGMAP:
-			switch variable.Type {
-			case REFERENCED:
+			switch variable.Source {
+			case REFERENCE:
 				envVarSource = &v1.EnvVarSource{
 					FieldRef: &v1.ObjectFieldSelector{
 						FieldPath: variable.Value.(string),
 					},
 				}
-			case STANDARD:
+			default:
 				envVarSource = &v1.EnvVarSource{
 					ConfigMapKeyRef: &v1.ConfigMapKeySelector{
 						Key:                  strings.ToLower(variable.Name),
 						LocalObjectReference: v1.LocalObjectReference{Name: configMapName},
 					},
 				}
-			case INLINE:
-				envVarSimple = &v1.EnvVar{
-					Name:  strings.ToUpper(variable.Name),
-					Value: variable.Value.(string),
-				}
 			}
 		case SECRET:
-			switch variable.Type {
-			case REFERENCED:
+			switch variable.Source {
+			case REFERENCE:
 				envVarSource = &v1.EnvVarSource{
 					FieldRef: &v1.ObjectFieldSelector{
 						FieldPath: variable.Value.(string),
 					},
 				}
-			case STANDARD:
+			default:
 				envVarSource = &v1.EnvVarSource{
 					SecretKeyRef: &v1.SecretKeySelector{
 						Key:                  strings.ToLower(variable.Name),
 						LocalObjectReference: v1.LocalObjectReference{Name: secretName},
 					},
 				}
-			case INLINE:
-				envVarSimple = &v1.EnvVar{
-					Name:  strings.ToUpper(variable.Name),
-					Value: variable.Value.(string),
-				}
+			}
+		case INLINE:
+			envVarSimple = &v1.EnvVar{
+				Name:  strings.ToUpper(variable.Name),
+				Value: variable.Value.(string),
 			}
 		}
 
@@ -310,8 +305,6 @@ func diffEnvs(src, dst []v1.EnvVar) (changed, removed, added []string) {
 					diff[srcEnv.Name] |= 4
 				}
 				break
-			} else {
-
 			}
 		}
 	}
@@ -356,11 +349,6 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 						FieldPath: variable.Value.(string),
 					},
 				}
-			case SIMPLE:
-				envVarSimple = &v1.EnvVar{
-					Name:  strings.ToUpper(variable.Name),
-					Value: variable.Value.(string),
-				}
 			default:
 				envVarSource = &v1.EnvVarSource{
 					ConfigMapKeyRef: &v1.ConfigMapKeySelector{
@@ -369,7 +357,6 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 					},
 				}
 			}
-
 		case SECRET:
 			switch variable.Source {
 			case REFERENCE:
@@ -378,11 +365,6 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 						FieldPath: variable.Value.(string),
 					},
 				}
-			case SIMPLE:
-				envVarSimple = &v1.EnvVar{
-					Name:  strings.ToUpper(variable.Name),
-					Value: variable.Value.(string),
-				}
 			default:
 				envVarSource = &v1.EnvVarSource{
 					SecretKeyRef: &v1.SecretKeySelector{
@@ -390,6 +372,11 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 						LocalObjectReference: v1.LocalObjectReference{Name: secret.Name},
 					},
 				}
+			}
+		case INLINE:
+			envVarSimple = &v1.EnvVar{
+				Name:  strings.ToUpper(variable.Name),
+				Value: variable.Value.(string),
 			}
 		}
 

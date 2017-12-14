@@ -83,7 +83,7 @@ func (c *LayeredConsul) Fetch(variable model.VariableDef) (*model.Variable, erro
 
 			ret := model.Variable{
 				Name:        variable.Name,
-				Type:        model.STANDARD,
+				Source:      model.LAYERED_CONSUL,
 				Destination: variable.Destination,
 				Value:       string(consulValue.Value),
 			}

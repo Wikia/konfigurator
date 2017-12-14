@@ -81,7 +81,7 @@ func (c *Consul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 
 	ret := model.Variable{
 		Name:        variable.Name,
-		Type:        model.STANDARD,
+		Source:      model.CONSUL,
 		Destination: variable.Destination,
 		Value:       string(consulValue.Value),
 	}

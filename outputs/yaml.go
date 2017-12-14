@@ -38,7 +38,7 @@ func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, va
 	}
 
 	for _, variable := range vars {
-		if variable.Type == model.REFERENCED {
+		if variable.Source == model.REFERENCE {
 			continue
 		}
 		switch variable.Destination {

@@ -15,7 +15,7 @@ func (i *Simple) Fetch(variable model.VariableDef) (*model.Variable, error) {
 
 	ret := model.Variable{
 		Name:        variable.Name,
-		Type:        model.INLINE,
+		Source:      model.SECRET,
 		Destination: variable.Destination,
 		Value:       variable.Value,
 	}

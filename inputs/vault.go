@@ -98,7 +98,7 @@ func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 
 	ret := model.Variable{
 		Name:        variable.Name,
-		Type:        model.STANDARD,
+		Source:      model.VAULT,
 		Destination: variable.Destination,
 		Value:       secret.Data[source[1]],
 	}

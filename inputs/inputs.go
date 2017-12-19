@@ -60,7 +60,7 @@ func Process(defs []model.VariableDef) ([]model.Variable, error) {
 			return nil, err
 		}
 
-		varKey := fmt.Sprintf("%s@%s", variable.Name, variable.Type)
+		varKey := fmt.Sprintf("%s@%s", variable.Name, variable.Source)
 		_, has := varSeen[varKey]
 
 		if has {

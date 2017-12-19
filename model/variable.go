@@ -5,6 +5,7 @@ type VariableDestination string
 const (
 	CONFIGMAP VariableDestination = "config"
 	SECRET                        = "secret"
+	INLINE                        = "inline"
 )
 
 type VariableDef struct {

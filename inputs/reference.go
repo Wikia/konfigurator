@@ -23,7 +23,7 @@ func (i *Reference) Fetch(variable model.VariableDef) (*model.Variable, error) {
 
 	ret := model.Variable{
 		Name:        variable.Name,
-		Type:        model.REFERENCED,
+		Source:      model.REFERENCE,
 		Destination: destination,
 		Value:       variable.Value,
 	}

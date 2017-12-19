@@ -19,6 +19,8 @@ Application:
   Definitions:
     # This value will be inserted directly into configuration
     simple_var: simple(some value)
+    # This value will be inserted directly into deployment
+    simple_var: simple(some value)->inline
     # This simple secret will be inserted into secrets as it is
     simple_secret: simple(abracadabra)->secret
     # This value will be inserted into a config map

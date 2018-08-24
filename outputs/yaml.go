@@ -59,7 +59,7 @@ func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, va
 	}
 
 	if len(secrets.Data) > 0 {
-		fmt.Fprintln(writer, "---")
+		fmt.Fprintln(writer, "\n---")
 
 		err := model.WriteSecrets(&secrets, [][]byte{}, writer)
 

@@ -41,6 +41,10 @@ func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, va
 		if variable.Source == model.REFERENCE {
 			continue
 		}
+		if variable.Value == nil {
+			return fmt.Errorf("variable is empty: %s", variable.Name)
+		}
+
 		switch variable.Destination {
 		case model.SECRET:
 			secrets.Data[variable.Name] = []byte(variable.Value.(string))

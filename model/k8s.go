@@ -213,7 +213,8 @@ func UpdateDeploymentInPlace(deployment *v1beta1.Deployment, variables []Variabl
 		return err
 	}
 
-	previousEnv := dstContainer.Env
+	previousEnv := make([]v1.EnvVar, len(dstContainer.Env))
+	copy(previousEnv, dstContainer.Env)
 
 	if overwriteEnv {
 		dstContainer.Env = []v1.EnvVar{}
@@ -301,7 +302,7 @@ func diffEnvs(src, dst []v1.EnvVar) (changed, removed, added []string) {
 		for _, dstEnv := range dst {
 			diff[dstEnv.Name] |= 2
 			if srcEnv.Name == dstEnv.Name {
-				if srcEnv.ValueFrom != nil && dstEnv.ValueFrom != nil && srcEnv.ValueFrom.String() == dstEnv.ValueFrom.String() {
+				if srcEnv.ValueFrom != nil && dstEnv.ValueFrom != nil && srcEnv.ValueFrom.String() == dstEnv.ValueFrom.String() || srcEnv.Value == dstEnv.Value {
 					diff[srcEnv.Name] |= 4
 				}
 				break
@@ -330,7 +331,8 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 		return err
 	}
 
-	previousEnv := dstContainer.Env
+	previousEnv := make([]v1.EnvVar, len(dstContainer.Env))
+	copy(previousEnv, dstContainer.Env)
 
 	if overwriteEnv {
 		dstContainer.Env = []v1.EnvVar{}

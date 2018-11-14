@@ -352,6 +352,9 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 					},
 				}
 			default:
+				if configMap == nil {
+					return fmt.Errorf("config map variables defined but no config map file provided")
+				}
 				envVarSource = &v1.EnvVarSource{
 					ConfigMapKeyRef: &v1.ConfigMapKeySelector{
 						Key:                  strings.ToLower(variable.Name),
@@ -368,6 +371,9 @@ func UpdateDeployment(deployment *v1beta1.Deployment, configMap *v1.ConfigMap, s
 					},
 				}
 			default:
+				if secret == nil {
+					return fmt.Errorf("secret variables defined but no secret file provided")
+				}
 				envVarSource = &v1.EnvVarSource{
 					SecretKeyRef: &v1.SecretKeySelector{
 						Key:                  strings.ToLower(variable.Name),

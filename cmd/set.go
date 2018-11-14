@@ -26,6 +26,7 @@ import (
 	"github.com/Wikia/konfigurator/model"
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/pkg/api"
+	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
@@ -50,12 +51,8 @@ to defined variables and saves it to a specified destination file`,
 			return fmt.Errorf("Missing deployment file")
 		}
 
-		if len(ConfigFile) == 0 {
-			return fmt.Errorf("Missing ConfigMap file")
-		}
-
-		if len(SecretsFile) == 0 {
-			return fmt.Errorf("Missing secrets file")
+		if len(ConfigFile) == 0 && len(SecretsFile) == 0 {
+			return fmt.Errorf("Missing ConfigMap/secrets file")
 		}
 
 		if len(ContainerName) == 0 {
@@ -66,16 +63,23 @@ to defined variables and saves it to a specified destination file`,
 			return fmt.Errorf("Missing destination file")
 		}
 
-		secret, _, err := model.ReadSecrets(SecretsFile)
+		var secret *v1.Secret
+		var err error
+		if len(SecretsFile) != 0 {
+			secret, _, err = model.ReadSecrets(SecretsFile)
 
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
 		}
 
-		configMap, _, err := model.ReadConfigMap(ConfigFile)
+		var configMap *v1.ConfigMap
+		if len(ConfigFile) != 0 {
+			configMap, _, err = model.ReadConfigMap(ConfigFile)
 
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
 		}
 
 		deployment, leftOver, err := model.ReadDeployment(DeploymentFile)

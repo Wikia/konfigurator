@@ -24,6 +24,7 @@ import (
 
 	"path/filepath"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/Wikia/konfigurator/config"
 	"github.com/Wikia/konfigurator/inputs"
 	"github.com/Wikia/konfigurator/model"
@@ -45,6 +46,7 @@ var mergeCmd = &cobra.Command{
 	deployments file`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := config.Get()
+		log.SetOutput(os.Stdout)
 
 		if len(cfg.Application.Name) == 0 {
 			return fmt.Errorf("Missing service name")

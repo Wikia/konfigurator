@@ -15,7 +15,7 @@ func (i *Simple) Fetch(variable model.VariableDef) (*model.Variable, error) {
 
 	ret := model.Variable{
 		Name:        variable.Name,
-		Source:      model.SECRET,
+		Source:      model.SIMPLE,
 		Destination: variable.Destination,
 		Value:       variable.Value,
 	}
@@ -24,5 +24,5 @@ func (i *Simple) Fetch(variable model.VariableDef) (*model.Variable, error) {
 }
 
 func init() {
-	Register(model.SIMPLE, &Simple{})
+	_ = Register(model.SIMPLE, &Simple{})
 }

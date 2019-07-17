@@ -55,7 +55,10 @@ func (c *Consul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	}
 
 	if c.client == nil {
-		c.initClient()
+		err := c.initClient()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	consulValue, qm, err := c.client.KV().Get(variable.Value.(string), c.queryOpts)
@@ -90,5 +93,5 @@ func (c *Consul) Fetch(variable model.VariableDef) (*model.Variable, error) {
 }
 
 func init() {
-	Register(model.CONSUL, &Consul{})
+	_ = Register(model.CONSUL, &Consul{})
 }

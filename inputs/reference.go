@@ -32,5 +32,5 @@ func (i *Reference) Fetch(variable model.VariableDef) (*model.Variable, error) {
 }
 
 func init() {
-	Register(model.REFERENCE, &Reference{})
+	_ = Register(model.REFERENCE, &Reference{})
 }

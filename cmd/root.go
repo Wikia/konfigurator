@@ -45,7 +45,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	config.Setup(RootCmd)
+	_ = config.Setup(RootCmd)
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.konfigurator.yaml)")
 }
 

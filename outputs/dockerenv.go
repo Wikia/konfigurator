@@ -34,5 +34,5 @@ func (o *OutputDockerEnv) Save(name string, namespace string, writer io.Writer, 
 }
 
 func init() {
-	Register("dockerenv", &OutputDockerEnv{})
+	_ = Register("dockerenv", &OutputDockerEnv{})
 }

@@ -19,7 +19,7 @@ ifeq ($(OS),Windows_NT)
 else
 	BINARY_EXT :=
 endif
-GO_LINT := $(GO_PATH)/bin/golint$(BINARY_EXT)
+GO_LINT := $(GO_PATH)/bin/golangci-lint$(BINARY_EXT)
 GO_GLIDE := $(GO_PATH)/bin/glide$(BINARY_EXT)
 GO_BINDATA := $(GO_PATH)/bin/bindata$(BINARY_EXT)
 GO_GINKGO := $(GO_PATH)/bin/ginkgo$(BINARY_EXT)
@@ -61,7 +61,7 @@ $(BINARY): $(SOURCES)
 	go build ${LDFLAGS} -o ${BINARY} main.go
 
 $(GO_LINT):
-	go get -u github.com/golang/lint/golint
+	curl -ssfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b ${GO_PATH}/bin v1.17.1
 
 $(GO_GLIDE):
 	go get -u github.com/Masterminds/glide
@@ -97,8 +97,11 @@ fmt: $(TARGETS_FMT)
 $(TARGETS_FMT): fmt-%: %
 	@gofmt -s -w $</
 
-lint: $(GO_LINT) $(TARGETS_LINT)
-# @golint
+lint: $(GO_LINT)
+	@$(GO_LINT) run ./...
+
+checkstyle: $(GO_LINT)
+	@$(GO_LINT) run --out-format checkstyle ./... > checkstyle.xml
 
 $(TARGETS_LINT): lint-%: %
 	@$(GO_LINT) $(PROJECT_PATH)/$<

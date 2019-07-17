@@ -55,7 +55,10 @@ func (c *LayeredConsul) Fetch(variable model.VariableDef) (*model.Variable, erro
 	}
 
 	if c.client == nil {
-		c.initClient()
+		err := c.initClient()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	appName := variable.Context["appname"]
@@ -102,5 +105,5 @@ func (c *LayeredConsul) Fetch(variable model.VariableDef) (*model.Variable, erro
 }
 
 func init() {
-	Register(model.LAYERED_CONSUL, &LayeredConsul{})
+	_ = Register(model.LAYERED_CONSUL, &LayeredConsul{})
 }

@@ -34,5 +34,5 @@ func (o *OutputEnvrc) Save(name string, namespace string, writer io.Writer, vars
 }
 
 func init() {
-	Register("envrc", &OutputEnvrc{})
+	_ = Register("envrc", &OutputEnvrc{})
 }

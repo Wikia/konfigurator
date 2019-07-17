@@ -34,5 +34,5 @@ func (o *OutputOneline) Save(name string, namespace string, writer io.Writer, va
 }
 
 func init() {
-	Register("envoneline", &OutputOneline{})
+	_ = Register("envoneline", &OutputOneline{})
 }

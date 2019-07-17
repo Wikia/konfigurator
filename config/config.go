@@ -47,7 +47,7 @@ var layeredConsulRegex = regexp.MustCompile(`^(?P<key>[^#]+)(?:#(?P<appname>[^@]
 func Setup(cmd *cobra.Command) error {
 	levels := make([]string, len(log.AllLevels))
 	for i, level := range log.AllLevels {
-		levels[i] = fmt.Sprintf("%s", level)
+		levels[i] = string(level)
 	}
 
 	homeDir, err := homedir.Dir()
@@ -71,16 +71,16 @@ func Setup(cmd *cobra.Command) error {
 	cmd.PersistentFlags().String("consulDatacenter", "", "Datacenter to be used in Consul")
 	cmd.PersistentFlags().Bool("consulTlsSkipVerify", false, "Should TLS certificate be verified")
 
-	viper.BindPFlag("loglevel", cmd.PersistentFlags().Lookup("logLevel"))
-	viper.BindPFlag("kubeconf", cmd.PersistentFlags().Lookup("kubeConf"))
-	viper.BindPFlag("vault.address", cmd.PersistentFlags().Lookup("vaultAddress"))
-	viper.BindPFlag("vault.token", cmd.PersistentFlags().Lookup("vaultToken"))
-	viper.BindPFlag("vault.tokenpath", cmd.PersistentFlags().Lookup("vaultTokenPath"))
-	viper.BindPFlag("vault.tlsskipverify", cmd.PersistentFlags().Lookup("vaultTlsSkipVerify"))
-	viper.BindPFlag("consul.address", cmd.PersistentFlags().Lookup("consulAddress"))
-	viper.BindPFlag("consul.token", cmd.PersistentFlags().Lookup("consulToken"))
-	viper.BindPFlag("consul.datacenter", cmd.PersistentFlags().Lookup("consulDatacenter"))
-	viper.BindPFlag("consul.tlsskipverify", cmd.PersistentFlags().Lookup("consulTlsSkipVerify"))
+	_ = viper.BindPFlag("loglevel", cmd.PersistentFlags().Lookup("logLevel"))
+	_ = viper.BindPFlag("kubeconf", cmd.PersistentFlags().Lookup("kubeConf"))
+	_ = viper.BindPFlag("vault.address", cmd.PersistentFlags().Lookup("vaultAddress"))
+	_ = viper.BindPFlag("vault.token", cmd.PersistentFlags().Lookup("vaultToken"))
+	_ = viper.BindPFlag("vault.tokenpath", cmd.PersistentFlags().Lookup("vaultTokenPath"))
+	_ = viper.BindPFlag("vault.tlsskipverify", cmd.PersistentFlags().Lookup("vaultTlsSkipVerify"))
+	_ = viper.BindPFlag("consul.address", cmd.PersistentFlags().Lookup("consulAddress"))
+	_ = viper.BindPFlag("consul.token", cmd.PersistentFlags().Lookup("consulToken"))
+	_ = viper.BindPFlag("consul.datacenter", cmd.PersistentFlags().Lookup("consulDatacenter"))
+	_ = viper.BindPFlag("consul.tlsskipverify", cmd.PersistentFlags().Lookup("consulTlsSkipVerify"))
 
 	return nil
 }
@@ -94,7 +94,7 @@ func Get() *Config {
 }
 
 func ParseVariableDefinitions(values map[string]string) ([]model.VariableDef, error) {
-	ret := []model.VariableDef{}
+	var ret []model.VariableDef
 
 	for name, value := range values {
 		def := model.NewVariableDef()

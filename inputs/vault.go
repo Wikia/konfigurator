@@ -71,7 +71,10 @@ func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 	}
 
 	if v.client == nil {
-		v.initClient()
+		err := v.initClient()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	source := strings.SplitN(variable.Value.(string), ":", 2)
@@ -107,5 +110,5 @@ func (v *Vault) Fetch(variable model.VariableDef) (*model.Variable, error) {
 }
 
 func init() {
-	Register(model.VAULT, &Vault{})
+	_ = Register(model.VAULT, &Vault{})
 }

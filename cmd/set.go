@@ -108,7 +108,10 @@ to defined variables and saves it to a specified destination file`,
 		}
 
 		if !NoConfirm {
-			model.DiffDeploymets(oldDeployment.(*v1beta1.Deployment), deployment)
+			err := model.DiffDeploymets(oldDeployment.(*v1beta1.Deployment), deployment)
+			if err != nil {
+				return err
+			}
 
 			confirm, err := helpers.AskConfirm(os.Stdout, os.Stdin, "Apply changes?")
 

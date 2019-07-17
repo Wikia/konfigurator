@@ -83,6 +83,6 @@ func init() {
 	getCmd.PersistentFlags().StringP("namespace", "n", "dev", "Kubernetes namespace for which files should be generated for")
 	getCmd.PersistentFlags().String("name", "", "Name of the service to download variables for")
 
-	viper.BindPFlag("application.namespace", getCmd.PersistentFlags().Lookup("namespace"))
-	viper.BindPFlag("application.name", getCmd.PersistentFlags().Lookup("name"))
+	_ = viper.BindPFlag("application.namespace", getCmd.PersistentFlags().Lookup("namespace"))
+	_ = viper.BindPFlag("application.name", getCmd.PersistentFlags().Lookup("name"))
 }

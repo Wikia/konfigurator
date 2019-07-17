@@ -11,7 +11,7 @@ func AskConfirm(w io.Writer, r io.Reader, prompt string) (bool, error) {
 	reader := bufio.NewReader(r)
 
 	for {
-		fmt.Fprint(w, prompt+" [Y/n]")
+		_, _ = fmt.Fprint(w, prompt+" [Y/n]")
 
 		response, err := reader.ReadString('\n')
 		if err != nil {
@@ -27,8 +27,8 @@ func AskConfirm(w io.Writer, r io.Reader, prompt string) (bool, error) {
 
 		if response == "yes" || response == "y" {
 			return true, nil
+		} else {
+			return false, nil
 		}
-
-		return false, nil
 	}
 }

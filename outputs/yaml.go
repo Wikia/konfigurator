@@ -76,5 +76,5 @@ func (o *OutputK8SYaml) Save(name string, namespace string, writer io.Writer, va
 }
 
 func init() {
-	Register("k8s-yaml", &OutputK8SYaml{})
+	_ = Register("k8s-yaml", &OutputK8SYaml{})
 }

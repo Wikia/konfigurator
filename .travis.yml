@@ -2,9 +2,9 @@ sudo: false
 language: go
 matrix:
   allow_failures:
-  - go: tip
+  - go: 1.12
   include:
-  - go: tip
+  - go: 1.12
     env: SEND_COVERAGE=1
 before_install:
 - go get github.com/mattn/goveralls
